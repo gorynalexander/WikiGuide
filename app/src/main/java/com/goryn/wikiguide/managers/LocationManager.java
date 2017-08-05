@@ -4,13 +4,15 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
 
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
+import com.goryn.wikiguide.App;
 
 /**
  * Created by Odinn on 27.07.2017.
@@ -26,7 +28,6 @@ public class LocationManager implements LocationListener {
     public LocationManager(Context context) {
         this.context = context;
         createLocationRequest();
-
     }
 
     private void createLocationRequest() {
@@ -34,6 +35,7 @@ public class LocationManager implements LocationListener {
         locationRequest.setInterval(5000);
         locationRequest.setFastestInterval(1000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
     }
 
     public void updateMap(GoogleMap map) {
@@ -55,7 +57,7 @@ public class LocationManager implements LocationListener {
         map.setMyLocationEnabled(true);
     }
 
-    public Location getCurrentLocation(){
+    public Location getCurrentLocation() {
         return currentLocation;
     }
 
@@ -64,18 +66,27 @@ public class LocationManager implements LocationListener {
         currentLocation = location;
     }
 
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
 
+    public void startLocationUpdates() {
+        if (locationRequest == null) {
+            createLocationRequest();
+        }
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(App.getGoogleApiClient(), locationRequest, this);
+        currentLocation = LocationServices.FusedLocationApi.getLastLocation(App.getGoogleApiClient());
     }
 
-    @Override
-    public void onProviderEnabled(String s) {
-
+    public void stopLocationUpdates(){
+        LocationServices.FusedLocationApi.removeLocationUpdates(App.getGoogleApiClient(),  this);
     }
 
-    @Override
-    public void onProviderDisabled(String s) {
-
-    }
 }

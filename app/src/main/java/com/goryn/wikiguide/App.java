@@ -2,6 +2,8 @@ package com.goryn.wikiguide;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.goryn.wikiguide.managers.LocationManager;
@@ -17,12 +19,11 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
         mInstance = this;
-
         Context context = getApplicationContext();
         googleApiHelper = new GoogleApiHelper();
         locationManager = new LocationManager(context);
+
     }
 
     public static App getInstance() {
@@ -30,7 +31,7 @@ public class App extends Application {
     }
 
     public static GoogleApiClient getGoogleApiClient() {
-        return getInstance().googleApiHelper.getGoogleApiClient();
+        return getGoogleApiHelper().getGoogleApiClient();
     }
 
     public static GoogleApiHelper getGoogleApiHelper(){

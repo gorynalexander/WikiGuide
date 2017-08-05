@@ -5,6 +5,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 public class GoogleApiHelper {
     private GoogleApiClient googleApiClient;
 
+    public GoogleApiHelper() {}
+
     public void setGoogleApiClient(GoogleApiClient googleApiClient) {
         this.googleApiClient = googleApiClient;
     }

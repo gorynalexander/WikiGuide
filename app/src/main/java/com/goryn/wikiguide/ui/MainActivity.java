@@ -1,5 +1,7 @@
 package com.goryn.wikiguide.ui;
 
+import android.provider.SyncStateContract;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -12,6 +14,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -21,12 +24,16 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.ui.fragments.GameMapFragment;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
     Toolbar toolbar;
 
     FragmentManager fragmentManager;
@@ -35,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     /*  Location    */
     private Location myLocation;
     private LocationRequest mLocationRequest;
-    private GoogleApiClient apiClient;
+    private GoogleApiClient googleApiClient;
 
 
     @Override
@@ -48,6 +55,24 @@ public class MainActivity extends AppCompatActivity {
 
         initNavDrawer();
 
+        buildGoogleAPiClient();
+
+    }
+
+    private void buildGoogleAPiClient() {
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addApi(LocationServices.API)
+                .enableAutoManage(this, 0, this)
+                .build();
+
+        App.getGoogleApiHelper().setGoogleApiClient(googleApiClient);
+        App.getGoogleApiHelper().connect();
+
+//
+//
+//        Double kek = App.getLocationManager().getCurrentLocation().getLatitude();
+//        Toast.makeText(this, kek.toString(), Toast.LENGTH_SHORT).show();
     }
 
     private void initNavDrawer() {
@@ -110,5 +135,28 @@ public class MainActivity extends AppCompatActivity {
 
 
         queue.add(stringRequest);
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        App.getLocationManager().startLocationUpdates();
+        Toast.makeText(this, App.getLocationManager().getCurrentLocation().toString(), Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
+            Log.i("WikiGuide", "Connection lost.  Cause: Network Lost.");
+        } else if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
+            Log.i("WikiGuide", "Connection lost.  Reason: Service Disconnected");
+        } else {
+            Log.d("WikiGuide", "onConnectionSuspended: reason " + i);
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d("WikiGuide", "onConnectionFailed: connectionResult.toString() = " + connectionResult.toString());
     }
 }
