@@ -12,6 +12,8 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.goryn.wikiguide.App;
 
 /**
@@ -54,7 +56,11 @@ public class LocationManager implements LocationListener {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        map.setMyLocationEnabled(true);
+        map.setMyLocationEnabled(false);
+//        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+//        map.addMarker(new MarkerOptions()
+//        .position(latLng)
+//        .title("Your pos"));
     }
 
     public Location getCurrentLocation() {
@@ -85,8 +91,15 @@ public class LocationManager implements LocationListener {
         currentLocation = LocationServices.FusedLocationApi.getLastLocation(App.getGoogleApiClient());
     }
 
-    public void stopLocationUpdates(){
-        LocationServices.FusedLocationApi.removeLocationUpdates(App.getGoogleApiClient(),  this);
+    public void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(App.getGoogleApiClient(), this);
+    }
+
+    public void setUserMarker() {
+        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        googleMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .title("Your pos"));
     }
 
 }

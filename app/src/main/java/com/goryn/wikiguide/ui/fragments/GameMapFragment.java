@@ -16,7 +16,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
+import com.goryn.wikiguide.managers.LocationManager;
 
 /**
  * Created by Odinn on 19.07.2017.
@@ -45,7 +48,9 @@ public class GameMapFragment extends Fragment {
                     //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(46.4724973,30.7360218), 15));
                     return;
                 }
-                googleMap.setMyLocationEnabled(true);
+
+                App.getLocationManager().updateMap(googleMap);
+                //googleMap.setMyLocationEnabled(true);
 
             }
         });

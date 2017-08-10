@@ -32,6 +32,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.ui.fragments.GameMapFragment;
+import com.goryn.wikiguide.ui.fragments.PlacesFragment;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
     Toolbar toolbar;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.container, new GameMapFragment());
+        transaction.add(R.id.container, new PlacesFragment());
         transaction.commit();
         // TODO поставить маркер того, что айтем выбран
 
@@ -96,17 +97,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 switch (id) {
                     case R.id.nav_main:
                         Toast.makeText(MainActivity.this, "Main", Toast.LENGTH_SHORT).show();
-//                        fragment = new PlacesFragment();
+                        fragment = new PlacesFragment();
                         break;
                     case R.id.nav_map:
                         Toast.makeText(MainActivity.this, "Map", Toast.LENGTH_SHORT).show();
-//                        fragment = new GameMapFragment();
+                        fragment = new GameMapFragment();
                         break;
                 }
 //
-//                final FragmentTransaction transaction = fragmentManager.beginTransaction();
-//                transaction.replace(R.id.container, fragment)
-//                        .commit();
+                final FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.container, fragment)
+                        .commit();
                 drawer.closeDrawer(GravityCompat.START);
                 return true;
             }
@@ -121,11 +122,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         String gscoord = "46.5844002|30.7768015";
         String gsradius = "10000";
 //        String url = "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=37.786952|-122.399523&gsradius=10000&gslimit=10&format=json";
-        String url = String.format("https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=%1$s&gsradius=%2$s&gslimit=10&format=json", gscoord, gsradius);
-
+        //String url = String.format("https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=%1$s&gsradius=%2$s&gslimit=10&format=json", gscoord, gsradius);
+        String url = "https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|pageterms&colimit=50&piprop=thumbnail&pithumbsize=144&pilimit=50&wbptterms=description&generator=geosearch&ggscoord=37.786952|-122.399523&ggsradius=10000&ggslimit=50";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
+
             }
         }, new Response.ErrorListener() {
             @Override
@@ -140,14 +142,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         App.getLocationManager().startLocationUpdates();
-        Toast.makeText(this, App.getLocationManager().getCurrentLocation().toString(), Toast.LENGTH_SHORT).show();
-
+//        Toast.makeText(this, App.getLocationManager().getCurrentLocation().toString(), Toast.LENGTH_SHORT).show();
+        LatLng latLng = new LatLng(App.getLocationManager().getCurrentLocation().getLatitude(), App.getLocationManager().getCurrentLocation().getLongitude());
+        String str = Double.toString(latLng.latitude) + Double.toString(latLng.longitude);
+        toolbar.setTitle(str);
+//        App.getLocationManager().setUserMarker();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
         if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
-            Log.i("WikiGuide", "Connection lost.  Cause: Network Lost.");
+            Log.i("WikiGuide", "Connection lost.  Reason: Network Lost.");
         } else if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_SERVICE_DISCONNECTED) {
             Log.i("WikiGuide", "Connection lost.  Reason: Service Disconnected");
         } else {
