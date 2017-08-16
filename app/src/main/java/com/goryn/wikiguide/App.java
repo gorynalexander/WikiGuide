@@ -7,12 +7,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.goryn.wikiguide.managers.LocationManager;
+import com.goryn.wikiguide.model.Query;
 import com.goryn.wikiguide.utils.GoogleApiHelper;
 
 
 public class App extends Application {
     private GoogleApiHelper googleApiHelper;
     private LocationManager locationManager;
+
+    private Query query;
 
     private static App mInstance;
 
@@ -24,7 +27,11 @@ public class App extends Application {
         googleApiHelper = new GoogleApiHelper();
         locationManager = new LocationManager(context);
 
+        query = new Query();
+
     }
+
+
 
     public static App getInstance() {
         return mInstance;
@@ -41,4 +48,10 @@ public class App extends Application {
         return getInstance().locationManager;
     }
 
+    public static void setQuery(Query query){
+        getInstance().query = query;
+    }
+    public static Query getQuery(){
+        return getInstance().query;
+    }
 }

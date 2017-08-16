@@ -31,11 +31,13 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
+import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.QueryResult;
 import com.goryn.wikiguide.ui.fragments.GameMapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
 import com.goryn.wikiguide.utils.WikiQueryService;
 
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -53,6 +55,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private LocationRequest mLocationRequest;
     private GoogleApiClient googleApiClient;
 
+    /* App data from server */
+    List<Page> pagesList = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         initNavDrawer();
 
         buildGoogleAPiClient();
+
 
     }
 
@@ -143,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
                 Toast.makeText(MainActivity.this, "" +  response.body().getQuery().getPages().get(0).getTitle(), Toast.LENGTH_SHORT).show();
-
+                App.setQuery(response.body().getQuery());
             }
 
             @Override
