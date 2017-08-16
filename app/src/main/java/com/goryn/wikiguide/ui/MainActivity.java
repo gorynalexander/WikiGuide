@@ -31,8 +31,16 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
+import com.goryn.wikiguide.model.QueryResult;
 import com.goryn.wikiguide.ui.fragments.GameMapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
+import com.goryn.wikiguide.utils.WikiQueryService;
+
+import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.GsonConverterFactory;
+import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
     Toolbar toolbar;
@@ -116,27 +124,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     }
 
+    private Retrofit retrofitBuilder(){
+        return new Retrofit.Builder()
+                .baseUrl("https://en.wikipedia.org/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
 
-    private void makeRequestToWiki() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String gscoord = "46.5844002|30.7768015";
-        String gsradius = "10000";
-//        String url = "https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=37.786952|-122.399523&gsradius=10000&gslimit=10&format=json";
-        //String url = String.format("https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord=%1$s&gsradius=%2$s&gslimit=10&format=json", gscoord, gsradius);
-        String url = "https://en.wikipedia.org/w/api.php?action=query&prop=coordinates|pageimages|pageterms&colimit=50&piprop=thumbnail&pithumbsize=144&pilimit=50&wbptterms=description&generator=geosearch&ggscoord=37.786952|-122.399523&ggsradius=10000&ggslimit=50";
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+    private void makeRequestToWiki(LatLng latLng) {
+        Retrofit retrofit = retrofitBuilder();
+        WikiQueryService service = retrofit.create(WikiQueryService.class);
+
+        String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude , latLng.longitude);
+
+        Call<QueryResult> call = service.request(geo, 10000, 100);
+
+        call.enqueue(new retrofit2.Callback<QueryResult>() {
             @Override
-            public void onResponse(String response) {
+            public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
+                Toast.makeText(MainActivity.this, "" +  response.body().getQuery().getPages().get(0).getTitle(), Toast.LENGTH_SHORT).show();
 
             }
-        }, new Response.ErrorListener() {
+
             @Override
-            public void onErrorResponse(VolleyError error) {
+            public void onFailure(Call<QueryResult> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "FAIL", Toast.LENGTH_SHORT).show();
             }
         });
-
-
-        queue.add(stringRequest);
     }
 
     @Override
@@ -147,6 +161,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         String str = Double.toString(latLng.latitude) + Double.toString(latLng.longitude);
         toolbar.setTitle(str);
 //        App.getLocationManager().setUserMarker();
+        makeRequestToWiki(latLng);
+
     }
 
     @Override
