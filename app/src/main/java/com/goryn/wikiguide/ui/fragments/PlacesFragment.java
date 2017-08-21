@@ -40,13 +40,15 @@ public class PlacesFragment extends Fragment {
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
             rvPlaces.setLayoutManager(layoutManager);
             rvPlacesAdapter = new PlacesAdapter(pagesList);
-            rvPlaces.setAdapter(new PlacesAdapter(pagesList));
+            rvPlaces.setAdapter(rvPlacesAdapter);
         } else {
-            pagesList = new ArrayList<>();
             Toast.makeText(getContext(), "NULL", Toast.LENGTH_SHORT).show();
+            // TODO SHOW MESSAGE THAT NO PLACES DETECTED OR BAD CONNECTION
         }
-
-
         return view;
+    }
+
+    public void notifyDataFromActivity(){
+        rvPlacesAdapter.setPagesList(App.getQuery().getPages());
     }
 }
