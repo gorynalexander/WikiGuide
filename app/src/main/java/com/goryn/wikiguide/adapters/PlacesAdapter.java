@@ -41,9 +41,9 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
 
 //        if (page.getTerms().getDescription() != null) holder.tvPlaceDescription.setText(page.getTerms().getDescription().get(0));
 //
-//        Picasso.with(holder.itemView.getContext())
-//                .load(page.getThumbnail().getSource())
-//                .into(holder.ivPlaceImage);
+        Picasso.with(holder.itemView.getContext())
+                .load(page.getThumbUrl())
+                .into(holder.ivPlaceImage);
     }
 
     @Override

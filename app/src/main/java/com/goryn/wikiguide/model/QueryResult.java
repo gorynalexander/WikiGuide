@@ -12,6 +12,7 @@ public class QueryResult {
     @SerializedName("batchcomplete")
     @Expose
     private boolean batchcomplete;
+
     @SerializedName("query")
     @Expose
     private Query query;

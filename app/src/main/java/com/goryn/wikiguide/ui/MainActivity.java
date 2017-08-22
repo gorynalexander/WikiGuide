@@ -141,18 +141,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude , latLng.longitude);
 
-        Call<QueryResult> call = service.request(geo, 10000, 100);
+        Call<QueryResult> call = service.request(geo, 10000, 1000);
+
 
         call.enqueue(new retrofit2.Callback<QueryResult>() {
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
-//                Toast.makeText(MainActivity.this, "" +  response.body().getQuery().getPages().get(0).getTerms().getDescription(), Toast.LENGTH_SHORT).show();
-//                App.setQuery(response.body().getQuery());
-//                placesFragment.notifyDataFromActivity();
-                Gson gson = new Gson();
-                Page page = response.body().getQuery().getPages().get(1);
+                Toast.makeText(MainActivity.this, "" +  response.body().getQuery().getPages().get(0).getThumbUrl(), Toast.LENGTH_SHORT).show();
+                App.setQuery(response.body().getQuery());
+                placesFragment.notifyDataFromActivity();
 
-                Log.i("JSON_DATA",gson.toJson(response) );
+//
+//                Log.i("JSON_DATA",gson.toJson(response) );
 
             }
 
