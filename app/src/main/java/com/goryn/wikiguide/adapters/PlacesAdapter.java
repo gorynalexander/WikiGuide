@@ -12,6 +12,7 @@ import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder>{
@@ -19,12 +20,24 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
     List<Page> pagesList;
 
     public PlacesAdapter(List<Page> pagesList) {
-        this.pagesList = pagesList;
+        checkData(pagesList);
     }
 
     public void setPagesList(List<Page> pagesList){
-        this.pagesList = pagesList;
+        checkData(pagesList);
+
         notifyDataSetChanged();
+    }
+
+    private void checkData(List<Page> pagesList) {
+        Iterator<Page> iterator = pagesList.iterator();
+        while (iterator.hasNext()){
+            Page page = iterator.next();
+            if (page.getThumbUrl() == null){
+                iterator.remove();
+            }
+        }
+        this.pagesList = pagesList;
     }
 
     @Override
