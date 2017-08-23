@@ -1,5 +1,7 @@
 package com.goryn.wikiguide.model;
 
+import android.support.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -28,7 +30,7 @@ public class Page {
 
     @SerializedName("coordinates")
     @Expose
-    private List<Coordinate> coordinates = null;
+    private List<Coordinate> coordinates;
 
     @SerializedName("thumbnail")
     @Expose
@@ -63,12 +65,30 @@ public class Page {
         this.coordinates = coordinates;
     }
 
-    public Thumbnail getThumbnail() {
-        return thumbnail;
+    @Nullable
+    public String getThumbUrl() {
+        return thumbnail != null ? thumbnail.source() : null;
     }
 
-    public Terms getTerms() {
-        return terms;
+
+    @Nullable public String getDescription() {
+        return terms != null && terms.description() != null ? terms.description().get(0) : null;
+    }
+
+    static class Terms {
+        @SuppressWarnings("unused") private List<String> description;
+        List<String> description() {
+            return description;
+        }
+    }
+
+    static class Thumbnail {
+        @SuppressWarnings("unused") private String source;
+        @SuppressWarnings("unused") private int width;
+        @SuppressWarnings("unused") private int height;
+        String source() {
+            return source;
+        }
     }
 
 }

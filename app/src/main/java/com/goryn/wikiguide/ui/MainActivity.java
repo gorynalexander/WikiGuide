@@ -29,13 +29,16 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
+import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.QueryResult;
 import com.goryn.wikiguide.ui.fragments.GameMapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
 import com.goryn.wikiguide.utils.WikiQueryService;
 
+import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -54,6 +57,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private GoogleApiClient googleApiClient;
 
 
+    /* Fragments */
+    private PlacesFragment placesFragment;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +72,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         initNavDrawer();
 
         buildGoogleAPiClient();
+
+
 
     }
 
@@ -78,13 +87,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         App.getGoogleApiHelper().setGoogleApiClient(googleApiClient);
         App.getGoogleApiHelper().connect();
 
-//
-//
-//        Double kek = App.getLocationManager().getCurrentLocation().getLatitude();
-//        Toast.makeText(this, kek.toString(), Toast.LENGTH_SHORT).show();
     }
 
     private void initNavDrawer() {
+        placesFragment = new PlacesFragment();
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -93,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.container, new PlacesFragment());
+        transaction.add(R.id.container, placesFragment);
         transaction.commit();
         // TODO поставить маркер того, что айтем выбран
 
@@ -105,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 switch (id) {
                     case R.id.nav_main:
                         Toast.makeText(MainActivity.this, "Main", Toast.LENGTH_SHORT).show();
-                        fragment = new PlacesFragment();
+                        fragment = placesFragment;
                         break;
                     case R.id.nav_map:
                         Toast.makeText(MainActivity.this, "Map", Toast.LENGTH_SHORT).show();
@@ -120,8 +126,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 return true;
             }
         });
-
-
     }
 
     private Retrofit retrofitBuilder(){
@@ -137,12 +141,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude , latLng.longitude);
 
-        Call<QueryResult> call = service.request(geo, 10000, 100);
+        Call<QueryResult> call = service.request(geo, 10000, 1000);
+
 
         call.enqueue(new retrofit2.Callback<QueryResult>() {
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
-                Toast.makeText(MainActivity.this, "" +  response.body().getQuery().getPages().get(0).getTitle(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "" +  response.body().getQuery().getPages().get(0).getThumbUrl(), Toast.LENGTH_SHORT).show();
+                App.setQuery(response.body().getQuery());
+                placesFragment.notifyDataFromActivity();
+
+//
+//                Log.i("JSON_DATA",gson.toJson(response) );
 
             }
 

@@ -3,6 +3,7 @@ package com.goryn.wikiguide.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,6 +17,9 @@ public class Query {
     private List<Page> pages = null;
 
     public List<Page> getPages() {
+        if (pages == null){
+            return new ArrayList<>();
+        }
         return pages;
     }
 
