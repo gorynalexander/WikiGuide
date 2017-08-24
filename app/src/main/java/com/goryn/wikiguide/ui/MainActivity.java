@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     FragmentManager fragmentManager;
     Fragment fragment;
 
-    /*  Location    */
+    /*  Location   */
     private Location myLocation;
     private LocationRequest mLocationRequest;
     private GoogleApiClient googleApiClient;
@@ -72,8 +72,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         initNavDrawer();
 
         buildGoogleAPiClient();
-
-
 
     }
 
@@ -150,10 +148,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 Toast.makeText(MainActivity.this, "" +  response.body().getQuery().getPages().get(0).getThumbUrl(), Toast.LENGTH_SHORT).show();
                 App.setQuery(response.body().getQuery());
                 placesFragment.notifyDataFromActivity();
-
-//
-//                Log.i("JSON_DATA",gson.toJson(response) );
-
             }
 
             @Override
@@ -166,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         App.getLocationManager().startLocationUpdates();
-//        Toast.makeText(this, App.getLocationManager().getCurrentLocation().toString(), Toast.LENGTH_SHORT).show();
         LatLng latLng = new LatLng(App.getLocationManager().getCurrentLocation().getLatitude(), App.getLocationManager().getCurrentLocation().getLongitude());
         String str = Double.toString(latLng.latitude) + Double.toString(latLng.longitude);
         toolbar.setTitle(str);

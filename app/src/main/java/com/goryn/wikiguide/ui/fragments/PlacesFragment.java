@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.adapters.PlacesAdapter;
@@ -47,6 +48,8 @@ public class PlacesFragment extends Fragment {
         }
         return view;
     }
+
+
 
     public void notifyDataFromActivity(){
         rvPlacesAdapter.setPagesList(App.getQuery().getPages());
