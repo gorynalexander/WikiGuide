@@ -69,6 +69,11 @@ public class Page {
     public String getThumbUrl() {
         return thumbnail != null ? thumbnail.source() : null;
     }
+    public int getThumbWidth() {
+        return thumbnail.getWidth();
+    }    public int getThumbHeight() {
+        return thumbnail.getHeight();
+    }
 
 
     @Nullable public String getDescription() {
@@ -84,6 +89,15 @@ public class Page {
 
     static class Thumbnail {
         @SuppressWarnings("unused") private String source;
+
+        public int getWidth() {
+            return width;
+        }
+
+        public int getHeight() {
+            return height;
+        }
+
         @SuppressWarnings("unused") private int width;
         @SuppressWarnings("unused") private int height;
         String source() {

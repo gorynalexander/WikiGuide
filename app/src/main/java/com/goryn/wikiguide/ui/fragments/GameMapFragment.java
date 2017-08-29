@@ -63,6 +63,8 @@ public class GameMapFragment extends Fragment {
                     return;
                 }
                 App.getLocationManager().updateMap(googleMap);
+                App.getLocationManager().setMarkers(App.getQuery());
+
                 //googleMap.setMyLocationEnabled(true);
 
             }
@@ -71,31 +73,7 @@ public class GameMapFragment extends Fragment {
         return view;
     }
 
-    public void setMarkers(Query result){
-        List<MarkerOptions> optionList = new ArrayList<>();
 
-        for (Page page : result.getPages()){
-            if (page.getCoordinates() != null){
-                optionList.add(createMarkerOptions(page));
-            }
-        }
-
-    }
-    public MarkerOptions createMarkerOptions(Page page){
-
-        Uri imageUri = Uri.parse(page.getThumbUrl());
-        Bitmap bitmap = null;
-        try {
-            bitmap = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), imageUri);
-        } catch (IOException e) {
-            Log.e("WIKIGUIDE", e.getMessage());
-        }
-        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(bitmap);
-        return new MarkerOptions()
-                .position(new LatLng(page.getCoordinates().get(0).getLat(), page.getCoordinates().get(0).getLon()))
-                .title(page.getTitle())
-                .icon(bitmapDescriptor);
-    }
 
     @Override
     public void onResume() {

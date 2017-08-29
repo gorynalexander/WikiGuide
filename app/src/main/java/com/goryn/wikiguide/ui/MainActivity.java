@@ -1,5 +1,8 @@
 package com.goryn.wikiguide.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -36,6 +39,7 @@ import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.QueryResult;
 import com.goryn.wikiguide.ui.fragments.GameMapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
+import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
 import com.goryn.wikiguide.utils.WikiQueryService;
 
 import java.util.List;
@@ -60,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     /* Fragments */
     private PlacesFragment placesFragment;
 
+    private NetworkBroadcastReceiver broadcastReceiver;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +78,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         initNavDrawer();
 
         buildGoogleAPiClient();
+
+        broadcastReceiver = new NetworkBroadcastReceiver();
+        broadcastReceiver.setActivityHandler(this);
+        registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        // TODO : UNREGISTER BROADCAST RECIEVING
 
     }
 
@@ -126,18 +137,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private Retrofit retrofitBuilder(){
+    private Retrofit retrofitBuilder() {
         return new Retrofit.Builder()
                 .baseUrl("https://en.wikipedia.org/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
 
-    private void makeRequestToWiki(LatLng latLng) {
+    public void makeRequestToWiki(LatLng latLng) {
         Retrofit retrofit = retrofitBuilder();
         WikiQueryService service = retrofit.create(WikiQueryService.class);
 
-        String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude , latLng.longitude);
+        String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude, latLng.longitude);
 
         Call<QueryResult> call = service.request(geo, 10000, 1000);
 
@@ -145,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         call.enqueue(new retrofit2.Callback<QueryResult>() {
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
-                Toast.makeText(MainActivity.this, "" +  response.body().getQuery().getPages().get(0).getThumbUrl(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "" + response.body().getQuery().getPages().get(0).getThumbUrl(), Toast.LENGTH_SHORT).show();
                 App.setQuery(response.body().getQuery());
                 placesFragment.notifyDataFromActivity();
             }
@@ -159,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        Toast.makeText(this, "onConnected", Toast.LENGTH_SHORT).show();
         App.getLocationManager().startLocationUpdates();
         LatLng latLng = new LatLng(App.getLocationManager().getCurrentLocation().getLatitude(), App.getLocationManager().getCurrentLocation().getLongitude());
         String str = Double.toString(latLng.latitude) + Double.toString(latLng.longitude);
@@ -183,4 +195,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d("WikiGuide", "onConnectionFailed: connectionResult.toString() = " + connectionResult.toString());
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(broadcastReceiver);
+    }
 }
+

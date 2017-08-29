@@ -3,18 +3,36 @@ package com.goryn.wikiguide.managers;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.goryn.wikiguide.App;
+import com.goryn.wikiguide.model.Page;
+import com.goryn.wikiguide.model.Query;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.security.AccessController.getContext;
 
 /**
  * Created by Odinn on 27.07.2017.
@@ -57,10 +75,11 @@ public class LocationManager implements LocationListener {
             return;
         }
         map.setMyLocationEnabled(false);
-//        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-//        map.addMarker(new MarkerOptions()
-//        .position(latLng)
-//        .title("Your pos"));
+        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        map.addMarker(new MarkerOptions()
+        .position(latLng)
+        .title("Your pos"));
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 12.0f));
     }
 
     public Location getCurrentLocation() {
@@ -100,6 +119,32 @@ public class LocationManager implements LocationListener {
         googleMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .title("Your pos"));
+    }
+
+    public void setMarkers(Query result) {
+        for (Page page : result.getPages()) {
+            if (page.getCoordinates() != null) {
+                googleMap.addMarker(createMarkerOptions(page));
+            }
+        }
+    }
+
+    public MarkerOptions createMarkerOptions(Page page) {
+
+        Bitmap bitmap = null;
+
+        try {
+            bitmap = BitmapFactory.decodeStream((InputStream) new URL(page.getThumbUrl()).getContent());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Bitmap logo = Bitmap.createScaledBitmap(bitmap, page.getThumbWidth()/6, page.getThumbHeight()/6, true);
+        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(logo);
+        return new MarkerOptions()
+                .position(new LatLng(page.getCoordinates().get(0).getLat(), page.getCoordinates().get(0).getLon()))
+                .title(page.getTitle())
+                .icon(bitmapDescriptor);
+
     }
 
 }
