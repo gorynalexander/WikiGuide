@@ -159,6 +159,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 Toast.makeText(MainActivity.this, "" + response.body().getQuery().getPages().get(0).getThumbUrl(), Toast.LENGTH_SHORT).show();
                 App.setQuery(response.body().getQuery());
                 placesFragment.notifyDataFromActivity();
+                loadWikiPages(response.body().getQuery().getPages());
             }
 
             @Override
@@ -166,6 +167,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 Toast.makeText(MainActivity.this, "FAIL", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void loadWikiPages(List<Page> pages) {
+
     }
 
     @Override
