@@ -23,6 +23,7 @@ import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.adapters.PlacesAdapter;
 import com.goryn.wikiguide.model.Page;
+import com.goryn.wikiguide.model.WikiPage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,7 @@ public class PlacesFragment extends Fragment {
     RecyclerView rvPlaces;
     PlacesAdapter rvPlacesAdapter;
     List<Page> pagesList;
+    List<WikiPage> wikiPagesList;
 
     @Nullable
     @Override
@@ -45,11 +47,12 @@ public class PlacesFragment extends Fragment {
         Toast.makeText(getContext(), "OnCreateView", Toast.LENGTH_SHORT).show();
         if (App.getQuery().getPages() != null) {
             pagesList = App.getQuery().getPages();
+            wikiPagesList = App.getWikiQuery().getWikiPages();
             //Toast.makeText(getContext(),""+ App.getQuery().getPages().size(), Toast.LENGTH_SHORT).show();
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
             rvPlaces.setLayoutManager(layoutManager);
-            rvPlacesAdapter = new PlacesAdapter(pagesList);
-            rvPlaces.setAdapter(rvPlacesAdapter);
+//            rvPlacesAdapter = new PlacesAdapter(pagesList, wikiPagesList);
+//            rvPlaces.setAdapter(rvPlacesAdapter);
         } else {
             Toast.makeText(getContext(), "NULL", Toast.LENGTH_SHORT).show();
             // TODO SHOW MESSAGE THAT NO PLACES DETECTED OR BAD CONNECTION
@@ -63,7 +66,9 @@ public class PlacesFragment extends Fragment {
 
 
     public void notifyDataFromActivity() {
-        rvPlacesAdapter.setPagesList(App.getQuery().getPages());
+        rvPlacesAdapter = new PlacesAdapter(App.getQuery().getPages(), App.getWikiQuery().getWikiPages());
+        rvPlaces.setAdapter(rvPlacesAdapter);
+//        rvPlacesAdapter.setPagesList(App.getQuery().getPages(), App.getWikiQuery().getWikiPages());
     }
 
     public void isOnline() {

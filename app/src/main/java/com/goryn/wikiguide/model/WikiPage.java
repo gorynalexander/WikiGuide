@@ -17,4 +17,20 @@ public class WikiPage {
     @SerializedName("extract")
     @Expose
     public String extract;
+
+    public Integer getPageid() {
+        return pageid;
+    }
+
+    public Integer getNs() {
+        return ns;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getExtract() {
+        return extract;
+    }
 }

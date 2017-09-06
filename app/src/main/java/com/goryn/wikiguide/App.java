@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.goryn.wikiguide.managers.LocationManager;
 import com.goryn.wikiguide.model.Query;
+import com.goryn.wikiguide.model.WikiQuery;
 import com.goryn.wikiguide.utils.GoogleApiHelper;
 
 
@@ -16,8 +17,10 @@ public class App extends Application {
     private LocationManager locationManager;
 
     private Query query;
+    private WikiQuery wikiQuery;
 
     private static App mInstance;
+
 
     @Override
     public void onCreate() {
@@ -28,6 +31,7 @@ public class App extends Application {
         locationManager = new LocationManager(context);
 
         query = new Query();
+        wikiQuery = new WikiQuery();
 
     }
 
@@ -53,5 +57,13 @@ public class App extends Application {
     }
     public static Query getQuery(){
         return getInstance().query;
+    }
+
+    public static WikiQuery getWikiQuery() {
+        return getInstance().wikiQuery;
+    }
+
+    public static void setWikiQuery(WikiQuery wikiQuery) {
+        getInstance().wikiQuery = wikiQuery;
     }
 }

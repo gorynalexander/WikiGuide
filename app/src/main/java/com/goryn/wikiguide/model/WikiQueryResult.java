@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class WikiQueryResult {
 
+
     @SerializedName("batchcomplete")
     @Expose
     public Boolean batchcomplete;
@@ -13,5 +14,12 @@ public class WikiQueryResult {
     @Expose
     public WikiQuery query;
 
+    public Boolean getBatchcomplete() {
+        return batchcomplete;
+    }
+
+    public WikiQuery getQuery() {
+        return query;
+    }
 
 }

@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.model.Page;
+import com.goryn.wikiguide.model.WikiPage;
 import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
@@ -18,18 +19,21 @@ import java.util.List;
 public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder>{
 
     List<Page> pagesList;
+    List<WikiPage> wikiPagesList;
 
-    public PlacesAdapter(List<Page> pagesList) {
-        checkData(pagesList);
+    public PlacesAdapter(List<Page> pagesList, List<WikiPage> wikiPagesList) {
+        checkData(pagesList,wikiPagesList);
+
+
     }
 
-    public void setPagesList(List<Page> pagesList){
-        checkData(pagesList);
+    public void setPagesList(List<Page> pagesList, List<WikiPage> wikiPagesList){
+        checkData(pagesList, wikiPagesList);
 
         notifyDataSetChanged();
     }
 
-    private void checkData(List<Page> pagesList) {
+    private void checkData(List<Page> pagesList, List<WikiPage> wikiPagesList) {
         Iterator<Page> iterator = pagesList.iterator();
         while (iterator.hasNext()){
             Page page = iterator.next();
@@ -38,6 +42,7 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
             }
         }
         this.pagesList = pagesList;
+        this.wikiPagesList = wikiPagesList;
     }
 
     @Override
@@ -49,11 +54,17 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Page page = pagesList.get(position);
+        WikiPage wikiPage;
+        if (wikiPagesList.get(position) == null){
+            wikiPage = wikiPagesList.get(position);
+            holder.tvPlaceDescription.setText(wikiPage.getExtract());
+        }
+
         holder.tvPlaceTitle.setText(page.getTitle());
 
 
 //        if (page.getTerms().getDescription() != null) holder.tvPlaceDescription.setText(page.getTerms().getDescription().get(0));
-//
+
         Picasso.with(holder.itemView.getContext())
                 .load(page.getThumbUrl())
                 .into(holder.ivPlaceImage);
