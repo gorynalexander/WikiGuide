@@ -1,11 +1,14 @@
 package com.goryn.wikiguide.adapters;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.WikiPage;
@@ -16,18 +19,17 @@ import org.w3c.dom.Text;
 import java.util.Iterator;
 import java.util.List;
 
-public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder>{
+public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder> {
 
     List<Page> pagesList;
     List<WikiPage> wikiPagesList;
 
-    public PlacesAdapter(List<Page> pagesList, List<WikiPage> wikiPagesList) {
-        checkData(pagesList,wikiPagesList);
-
+    public PlacesAdapter(List<Page> pagesList) {
+        checkData(pagesList, wikiPagesList);
 
     }
 
-    public void setPagesList(List<Page> pagesList, List<WikiPage> wikiPagesList){
+    public void setPagesList(List<Page> pagesList, List<WikiPage> wikiPagesList) {
         checkData(pagesList, wikiPagesList);
 
         notifyDataSetChanged();
@@ -35,14 +37,13 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
 
     private void checkData(List<Page> pagesList, List<WikiPage> wikiPagesList) {
         Iterator<Page> iterator = pagesList.iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             Page page = iterator.next();
-            if (page.getThumbUrl() == null){
+            if (page.getThumbUrl() == null) {
                 iterator.remove();
             }
         }
         this.pagesList = pagesList;
-        this.wikiPagesList = wikiPagesList;
     }
 
     @Override
@@ -52,13 +53,12 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         Page page = pagesList.get(position);
-        WikiPage wikiPage;
-        if (wikiPagesList.get(position) == null){
-            wikiPage = wikiPagesList.get(position);
-            holder.tvPlaceDescription.setText(wikiPage.getExtract());
-        }
+
+        holder.tvPlaceDescription.setVisibility(View.GONE);
+        holder.tvPlaceDescription.setText(page.getExtract().replaceAll("\\<.*?>",""));
+
 
         holder.tvPlaceTitle.setText(page.getTitle());
 
@@ -68,6 +68,16 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
         Picasso.with(holder.itemView.getContext())
                 .load(page.getThumbUrl())
                 .into(holder.ivPlaceImage);
+        holder.btnPlaceReadmore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (holder.tvPlaceDescription.getVisibility() == View.GONE){
+                    holder.tvPlaceDescription.setVisibility(View.VISIBLE);
+                } else {
+                    holder.tvPlaceDescription.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     @Override
@@ -75,15 +85,19 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
         return pagesList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvPlaceTitle;
         TextView tvPlaceDescription;
         ImageView ivPlaceImage;
+
+        Button btnPlaceReadmore;
+
         public ViewHolder(View itemView) {
             super(itemView);
             tvPlaceTitle = (TextView) itemView.findViewById(R.id.tv_place_title);
             tvPlaceDescription = (TextView) itemView.findViewById(R.id.tv_place_description);
             ivPlaceImage = (ImageView) itemView.findViewById(R.id.iv_place_image);
+            btnPlaceReadmore = (Button) itemView.findViewById(R.id.btn_place_readmore);
         }
     }
 }

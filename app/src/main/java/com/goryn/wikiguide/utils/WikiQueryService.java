@@ -9,9 +9,6 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-/**
- * Created by Odinn on 10.08.2017.
- */
 
 public interface WikiQueryService {
     @GET("w/api.php?action=query&format=json&prop=coordinates|pageimages|pageterms&generator=geosearch&formatversion=2&colimit=50&piprop=thumbnail&pilimit=50&wbptterms=description&ggslimit=50")

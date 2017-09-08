@@ -42,6 +42,7 @@ import com.goryn.wikiguide.model.WikiQueryResult;
 import com.goryn.wikiguide.ui.fragments.GameMapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
 import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
+import com.goryn.wikiguide.utils.WikiPagesService;
 import com.goryn.wikiguide.utils.WikiQueryService;
 
 import java.util.List;
@@ -195,7 +196,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 WikiQueryResult result;
                 Gson gson = new Gson();
                 result = gson.fromJson(response, WikiQueryResult.class);
-//                Log.i("WIKIGUIDE_RESPONSE", result.getQuery().getWikiPages().get(0).getTitle());
+                App.setWikiQuery(result.getQuery());
+                placesFragment.notifyDataFromActivity();
+
+//                Log.i("WIKIGUIDE_RESPONSE", result.getQuery().getWikiPages().get(0).getExtract());
             }
         }, new Response.ErrorListener() {
             @Override
@@ -205,26 +209,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         });
         queue.add(stringRequest);
 
-//        Retrofit retrofit = retrofitBuilder();
-//        WikiQueryService service = retrofit.create(WikiQueryService.class);
-//        Call<WikiQueryResult> call = service.request(requestTitles);
-//        call.enqueue(new Callback<WikiQueryResult>() {
-//            @Override
-//            public void onResponse(Call<WikiQueryResult> call, retrofit2.Response<WikiQueryResult> response) {
-//                // Toast.makeText(MainActivity.this, response.body().query.getWikiPages().get(0).getTitle(), Toast.LENGTH_SHORT).show();
-//                Gson gson = new Gson();
-//
-//                Log.i("WIKIGUIDE", gson.toJson(response));
-//                // TODO If batchcomplete response.body().getQuery().getWikiPages().get(0).getTitle()
-////                App.setWikiQuery(response.body().query);
-////                placesFragment.notifyDataFromActivity();
-//            }
-//
-//            @Override
-//            public void onFailure(Call<WikiQueryResult> call, Throwable t) {
-//                Log.e("WIKIGUIDE_ERROR", "ERROR WHEN CALLING WIKI PAGES");
-//            }
-//        });
 
     }
 
