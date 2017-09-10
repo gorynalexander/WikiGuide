@@ -40,6 +40,18 @@ public class Page {
     @Expose
     private Terms terms;
 
+
+    private String extract;
+
+
+    public String getExtract() {
+        return extract;
+    }
+
+    public void setExtract(String extract) {
+        this.extract = extract;
+    }
+
     public int getPageid() {
         return pageid;
     }
@@ -70,22 +82,46 @@ public class Page {
         return thumbnail != null ? thumbnail.source() : null;
     }
 
+    public int getThumbWidth() {
+        return thumbnail.getWidth();
+    }
 
-    @Nullable public String getDescription() {
+    public int getThumbHeight() {
+        return thumbnail.getHeight();
+    }
+
+
+    @Nullable
+    public String getDescription() {
         return terms != null && terms.description() != null ? terms.description().get(0) : null;
     }
 
     static class Terms {
-        @SuppressWarnings("unused") private List<String> description;
+        @SuppressWarnings("unused")
+        private List<String> description;
+
         List<String> description() {
             return description;
         }
     }
 
     static class Thumbnail {
-        @SuppressWarnings("unused") private String source;
-        @SuppressWarnings("unused") private int width;
-        @SuppressWarnings("unused") private int height;
+        @SuppressWarnings("unused")
+        private String source;
+
+        public int getWidth() {
+            return width;
+        }
+
+        public int getHeight() {
+            return height;
+        }
+
+        @SuppressWarnings("unused")
+        private int width;
+        @SuppressWarnings("unused")
+        private int height;
+
         String source() {
             return source;
         }

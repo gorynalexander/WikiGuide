@@ -1,5 +1,8 @@
 package com.goryn.wikiguide.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -34,14 +37,19 @@ import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.QueryResult;
+import com.goryn.wikiguide.model.WikiQuery;
+import com.goryn.wikiguide.model.WikiQueryResult;
 import com.goryn.wikiguide.ui.fragments.GameMapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
+import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
+import com.goryn.wikiguide.utils.WikiPagesService;
 import com.goryn.wikiguide.utils.WikiQueryService;
 
 import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
 
@@ -51,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     FragmentManager fragmentManager;
     Fragment fragment;
 
-    /*  Location    */
+    /*  Location   */
     private Location myLocation;
     private LocationRequest mLocationRequest;
     private GoogleApiClient googleApiClient;
@@ -59,6 +67,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     /* Fragments */
     private PlacesFragment placesFragment;
+
+    private NetworkBroadcastReceiver broadcastReceiver;
+
+    /*Retrofit */
+//    private WikiQueryService service;
 
 
     @Override
@@ -73,7 +86,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         buildGoogleAPiClient();
 
-
+        broadcastReceiver = new NetworkBroadcastReceiver();
+        broadcastReceiver.setActivityHandler(this);
+        registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        // TODO : UNREGISTER BROADCAST RECIEVING
 
     }
 
@@ -110,11 +126,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 int id = item.getItemId();
                 switch (id) {
                     case R.id.nav_main:
-                        Toast.makeText(MainActivity.this, "Main", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this, "Main", Toast.LENGTH_SHORT).show();
                         fragment = placesFragment;
                         break;
                     case R.id.nav_map:
-                        Toast.makeText(MainActivity.this, "Map", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this, "Map", Toast.LENGTH_SHORT).show();
                         fragment = new GameMapFragment();
                         break;
                 }
@@ -128,18 +144,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private Retrofit retrofitBuilder(){
+    private Retrofit retrofitBuilder() {
         return new Retrofit.Builder()
                 .baseUrl("https://en.wikipedia.org/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
 
-    private void makeRequestToWiki(LatLng latLng) {
+    public void makeRequestToWiki(LatLng latLng) {
         Retrofit retrofit = retrofitBuilder();
         WikiQueryService service = retrofit.create(WikiQueryService.class);
 
-        String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude , latLng.longitude);
+        String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude, latLng.longitude);
 
         Call<QueryResult> call = service.request(geo, 10000, 1000);
 
@@ -147,13 +163,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         call.enqueue(new retrofit2.Callback<QueryResult>() {
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
-                Toast.makeText(MainActivity.this, "" +  response.body().getQuery().getPages().get(0).getThumbUrl(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this, "" + response.body().getQuery().getPages().get(0).getThumbUrl(), Toast.LENGTH_SHORT).show();
                 App.setQuery(response.body().getQuery());
-                placesFragment.notifyDataFromActivity();
 
-//
-//                Log.i("JSON_DATA",gson.toJson(response) );
-
+                loadWikiPages(response.body().getQuery().getPages());
             }
 
             @Override
@@ -163,10 +176,46 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
+    private void loadWikiPages(List<Page> pages) {
+        String titles = "";
+        for (int i = 0; i < pages.size(); i++) {
+            if (i == pages.size() - 1) {
+                titles += pages.get(i).getTitle();
+            } else titles += pages.get(i).getTitle() + "|";
+        }
+        String requestTitles = titles.replaceAll(" ", "%20");
+        Log.i("WIKIGUIDE", requestTitles);
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=1&formatversion=2&titles=Port of Odessa|North Odessa Cape|Kuyalnik Estuary|Dofinivka Estuary|Luzanivka Hydropark";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url.replaceAll(" ", "%20"), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.i("WIKIGUIDE_RESPONSE", response);
+                WikiQueryResult result;
+                Gson gson = new Gson();
+                result = gson.fromJson(response, WikiQueryResult.class);
+                App.setWikiQuery(result.getQuery());
+                placesFragment.notifyDataFromActivity();
+
+//                Log.i("WIKIGUIDE_RESPONSE", result.getQuery().getWikiPages().get(0).getExtract());
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        queue.add(stringRequest);
+
+
+    }
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+//        Toast.makeText(this, "onConnected", Toast.LENGTH_SHORT).show();
         App.getLocationManager().startLocationUpdates();
-//        Toast.makeText(this, App.getLocationManager().getCurrentLocation().toString(), Toast.LENGTH_SHORT).show();
         LatLng latLng = new LatLng(App.getLocationManager().getCurrentLocation().getLatitude(), App.getLocationManager().getCurrentLocation().getLongitude());
         String str = Double.toString(latLng.latitude) + Double.toString(latLng.longitude);
         toolbar.setTitle(str);
@@ -190,4 +239,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d("WikiGuide", "onConnectionFailed: connectionResult.toString() = " + connectionResult.toString());
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unregisterReceiver(broadcastReceiver);
+    }
 }
+
