@@ -1,5 +1,6 @@
 package com.goryn.wikiguide.adapters;
 
+import android.support.annotation.Dimension;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,8 +58,9 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
         Page page = pagesList.get(position);
 
         holder.tvPlaceDescription.setVisibility(View.GONE);
-        holder.tvPlaceDescription.setText(page.getExtract().replaceAll("\\<.*?>",""));
-
+        String text = page.getExtract().replaceAll("\\<.*?>","");
+        text = text.trim();
+        holder.tvPlaceDescription.setText(text);
 
         holder.tvPlaceTitle.setText(page.getTitle());
 
