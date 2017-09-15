@@ -9,23 +9,18 @@ import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.AlertDialogLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.adapters.PlacesAdapter;
 import com.goryn.wikiguide.model.Page;
-import com.goryn.wikiguide.model.WikiPage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -34,7 +29,6 @@ public class PlacesFragment extends Fragment {
     RecyclerView rvPlaces;
     PlacesAdapter rvPlacesAdapter;
     List<Page> pagesList;
-    List<WikiPage> wikiPagesList;
 
     @Nullable
     @Override
@@ -44,7 +38,6 @@ public class PlacesFragment extends Fragment {
         Toast.makeText(getContext(), "OnCreateView", Toast.LENGTH_SHORT).show();
         if (App.getQuery().getPages() != null) {
             pagesList = App.getQuery().getPages();
-            wikiPagesList = App.getWikiQuery().getWikiPages();
             //Toast.makeText(getContext(),""+ App.getQuery().getPages().size(), Toast.LENGTH_SHORT).show();
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
             rvPlaces.setLayoutManager(layoutManager);
@@ -63,7 +56,7 @@ public class PlacesFragment extends Fragment {
 
 
     public void notifyDataFromActivity() {
-        rvPlacesAdapter.setPagesList(App.getQuery().getPages(), App.getWikiQuery().getWikiPages());
+        rvPlacesAdapter.setPagesList(App.getQuery().getPages());
     }
 
     public void isOnline() {

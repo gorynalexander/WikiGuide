@@ -1,9 +1,7 @@
 package com.goryn.wikiguide.ui;
 
-import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
-import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.location.Location;
@@ -18,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -37,19 +36,15 @@ import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.QueryResult;
-import com.goryn.wikiguide.model.WikiQuery;
-import com.goryn.wikiguide.model.WikiQueryResult;
 import com.goryn.wikiguide.ui.fragments.GameMapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
 import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
-import com.goryn.wikiguide.utils.WikiPagesService;
 import com.goryn.wikiguide.utils.WikiQueryService;
 
 import java.util.List;
 import java.util.Locale;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
 
@@ -63,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private Location myLocation;
     private LocationRequest mLocationRequest;
     private GoogleApiClient googleApiClient;
+    private LatLng currentLatLng;
 
 
     /* Fragments */
@@ -126,15 +122,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 int id = item.getItemId();
                 switch (id) {
                     case R.id.nav_main:
-//                        Toast.makeText(MainActivity.this, "Main", Toast.LENGTH_SHORT).show();
                         fragment = placesFragment;
                         break;
                     case R.id.nav_map:
-//                        Toast.makeText(MainActivity.this, "Map", Toast.LENGTH_SHORT).show();
                         fragment = new GameMapFragment();
                         break;
                 }
-//
+
                 final FragmentTransaction transaction = fragmentManager.beginTransaction();
                 transaction.replace(R.id.container, fragment)
                         .commit();
@@ -163,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         call.enqueue(new retrofit2.Callback<QueryResult>() {
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
-//                Toast.makeText(MainActivity.this, "" + response.body().getQuery().getPages().get(0).getThumbUrl(), Toast.LENGTH_SHORT).show();
                 App.setQuery(response.body().getQuery());
 
                 loadWikiPages(response.body().getQuery().getPages());
@@ -193,13 +186,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onResponse(String response) {
                 Log.i("WIKIGUIDE_RESPONSE", response);
-                WikiQueryResult result;
+                QueryResult result;
                 Gson gson = new Gson();
-                result = gson.fromJson(response, WikiQueryResult.class);
+                result = gson.fromJson(response, QueryResult.class);
                 App.setWikiQuery(result.getQuery());
                 placesFragment.notifyDataFromActivity();
 
-//                Log.i("WIKIGUIDE_RESPONSE", result.getQuery().getWikiPages().get(0).getExtract());
             }
         }, new Response.ErrorListener() {
             @Override
@@ -214,13 +206,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-//        Toast.makeText(this, "onConnected", Toast.LENGTH_SHORT).show();
+
         App.getLocationManager().startLocationUpdates();
-        LatLng latLng = new LatLng(App.getLocationManager().getCurrentLocation().getLatitude(), App.getLocationManager().getCurrentLocation().getLongitude());
-        String str = Double.toString(latLng.latitude) + Double.toString(latLng.longitude);
-        toolbar.setTitle(str);
-//        App.getLocationManager().setUserMarker();
-        makeRequestToWiki(latLng);
+        currentLatLng = new LatLng(App.getLocationManager().getCurrentLocation().getLatitude(), App.getLocationManager().getCurrentLocation().getLongitude());
+        String str = Double.toString(currentLatLng.latitude) + Double.toString(currentLatLng.longitude);
+
+        makeRequestToWiki(currentLatLng);
 
     }
 
@@ -244,6 +235,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onStop() {
         super.onStop();
         unregisterReceiver(broadcastReceiver);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_update:
+                makeRequestToWiki(currentLatLng);
+                return true;
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
 

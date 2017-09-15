@@ -3,7 +3,6 @@ package com.goryn.wikiguide.utils;
 import android.support.annotation.NonNull;
 
 import com.goryn.wikiguide.model.QueryResult;
-import com.goryn.wikiguide.model.WikiQueryResult;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -16,8 +15,4 @@ public interface WikiQueryService {
                               @Query("ggsradius") double radius,
                               @Query("pithumbsize") int thumbsize);
 
-    @GET("w/api.php?action=query&format=json&prop=extracts&exintro=1&formatversion=2")
-    Call<WikiQueryResult> request(@NonNull @Query("titles") String titles);
-
-    //titles=Luzanivka+Hydropark%7CNorth+Odessa+Cape&formatversion=2&
 }

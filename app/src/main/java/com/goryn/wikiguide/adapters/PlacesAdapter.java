@@ -1,8 +1,6 @@
 package com.goryn.wikiguide.adapters;
 
-import android.support.annotation.Dimension;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +10,7 @@ import android.widget.TextView;
 
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.model.Page;
-import com.goryn.wikiguide.model.WikiPage;
 import com.squareup.picasso.Picasso;
-
-import org.w3c.dom.Text;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,20 +18,19 @@ import java.util.List;
 public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder> {
 
     List<Page> pagesList;
-    List<WikiPage> wikiPagesList;
+
 
     public PlacesAdapter(List<Page> pagesList) {
-        checkData(pagesList, wikiPagesList);
-
+        checkData(pagesList);
     }
 
-    public void setPagesList(List<Page> pagesList, List<WikiPage> wikiPagesList) {
-        checkData(pagesList, wikiPagesList);
+    public void setPagesList(List<Page> pagesList) {
+        checkData(pagesList);
 
         notifyDataSetChanged();
     }
 
-    private void checkData(List<Page> pagesList, List<WikiPage> wikiPagesList) {
+    private void checkData(List<Page> pagesList) {
         Iterator<Page> iterator = pagesList.iterator();
         while (iterator.hasNext()) {
             Page page = iterator.next();

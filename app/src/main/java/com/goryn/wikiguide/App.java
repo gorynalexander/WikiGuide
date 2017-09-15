@@ -2,14 +2,11 @@ package com.goryn.wikiguide;
 
 import android.app.Application;
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.goryn.wikiguide.managers.LocationManager;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.Query;
-import com.goryn.wikiguide.model.WikiQuery;
 import com.goryn.wikiguide.utils.GoogleApiHelper;
 
 import java.util.List;
@@ -20,7 +17,7 @@ public class App extends Application {
     private LocationManager locationManager;
 
     private Query query;
-    private WikiQuery wikiQuery;
+    private Query wQuery;
 
     private static App mInstance;
 
@@ -34,11 +31,9 @@ public class App extends Application {
         locationManager = new LocationManager(context);
 
         query = new Query();
-        wikiQuery = new WikiQuery();
+        wQuery = new Query();
 
     }
-
-
 
     public static App getInstance() {
         return mInstance;
@@ -62,17 +57,13 @@ public class App extends Application {
         return getInstance().query;
     }
 
-    public static WikiQuery getWikiQuery() {
-        return getInstance().wikiQuery;
-    }
-
-    public static void setWikiQuery(WikiQuery wikiQuery) {
+    public static void setWikiQuery(Query wikiQuery) {
 
         List<Page> query = getInstance().query.getPages();
         for (int i = 0; i < query.size(); i++){
-            query.get(i).setExtract(wikiQuery.getWikiPages().get(i).getExtract());
+            query.get(i).setExtract(wikiQuery.getPages().get(i).getExtract());
         }
 
-        getInstance().wikiQuery = wikiQuery;
+        getInstance().wQuery = wikiQuery;
     }
 }

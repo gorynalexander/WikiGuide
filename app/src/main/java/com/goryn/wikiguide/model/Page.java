@@ -41,6 +41,8 @@ public class Page {
     private Terms terms;
 
 
+    @SerializedName("extract")
+    @Expose
     private String extract;
 
 
