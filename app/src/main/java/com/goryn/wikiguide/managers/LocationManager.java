@@ -142,8 +142,7 @@ public class LocationManager implements LocationListener {
         BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(logo);
         return new MarkerOptions()
                 .position(new LatLng(page.getCoordinates().get(0).getLat(), page.getCoordinates().get(0).getLon()))
-                .title(page.getTitle())
-                .icon(bitmapDescriptor);
+                .title(page.getTitle());
 
     }
 

@@ -1,5 +1,6 @@
 package com.goryn.wikiguide.ui;
 
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.support.annotation.Nullable;
@@ -30,6 +31,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.SettingsApi;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.goryn.wikiguide.App;
@@ -127,6 +129,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     case R.id.nav_map:
                         fragment = new GameMapFragment();
                         break;
+                    case R.id.nav_settings:
+                  //      Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                     //   startActivity(intent);
+                        break;
                 }
 
                 final FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -158,8 +164,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
                 App.setQuery(response.body().getQuery());
-
-                loadWikiPages(response.body().getQuery().getPages());
+                placesFragment.notifyDataFromActivity();
+//                loadWikiPages(response.body().getQuery().getPages());
             }
 
             @Override
@@ -180,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Log.i("WIKIGUIDE", requestTitles);
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=1&formatversion=2&titles=Port of Odessa|North Odessa Cape|Kuyalnik Estuary|Dofinivka Estuary|Luzanivka Hydropark";
+        String url = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=1&formatversion=2&titles="+requestTitles;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url.replaceAll(" ", "%20"), new Response.Listener<String>() {
             @Override
