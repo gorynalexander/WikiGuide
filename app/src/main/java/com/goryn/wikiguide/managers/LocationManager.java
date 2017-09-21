@@ -5,6 +5,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,6 +16,9 @@ import android.provider.MediaStore;
 import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -20,16 +27,20 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.goryn.wikiguide.App;
+import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.Query;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static java.security.AccessController.getContext;
@@ -80,7 +91,15 @@ public class LocationManager implements LocationListener {
         .position(latLng)
         .title("Your pos"));
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 12.0f));
+
+        map.addCircle(new CircleOptions()
+        .center(latLng)
+        .radius(5000)
+        .strokeColor(Color.BLUE));
+
+        setMarkers(App.getQuery());
     }
+
 
     public Location getCurrentLocation() {
         return currentLocation;
@@ -123,27 +142,37 @@ public class LocationManager implements LocationListener {
 
     public void setMarkers(Query result) {
         for (Page page : result.getPages()) {
+            Log.i("MAP_DEBUGING", "123");
             if (page.getCoordinates() != null) {
+                Log.i("MAP_DEBUGING", page.getTitle());
                 googleMap.addMarker(createMarkerOptions(page));
             }
         }
+
     }
 
     public MarkerOptions createMarkerOptions(Page page) {
-
-        Bitmap bitmap = null;
-
-        try {
-            bitmap = BitmapFactory.decodeStream((InputStream) new URL(page.getThumbUrl()).getContent());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Bitmap logo = Bitmap.createScaledBitmap(bitmap, page.getThumbWidth()/6, page.getThumbHeight()/6, true);
-        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromBitmap(logo);
         return new MarkerOptions()
                 .position(new LatLng(page.getCoordinates().get(0).getLat(), page.getCoordinates().get(0).getLon()))
-                .title(page.getTitle());
-
+                .title(page.getTitle())
+                .icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromImageUrl(page.getThumbUrl())));
     }
 
+    private Bitmap createBitmapFromImageUrl(String url){
+        View customMarkerView = ((LayoutInflater)  context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.image_marker, null);
+        ImageView ivMarker = (ImageView) customMarkerView.findViewById(R.id.ivPhotoMarker);
+        Picasso.with(context).load(url).into(ivMarker);
+        customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
+        customMarkerView.buildDrawingCache();
+        Bitmap returnedBitmap = Bitmap.createBitmap(customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_IN);
+        Drawable drawable = customMarkerView.getBackground();
+        if (drawable != null){
+            drawable.draw(canvas);
+        }
+        customMarkerView.draw(canvas);
+        return returnedBitmap;
+    }
 }

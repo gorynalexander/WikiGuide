@@ -99,7 +99,9 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
                     Gson gson = new Gson();
                     result = gson.fromJson(response, QueryResult.class);
                     holder.tvPlaceDescription.setVisibility(View.VISIBLE);
-                    holder.tvPlaceDescription.setText(result.getQuery().getPages().get(0).getExtract());
+                    String text = result.getQuery().getPages().get(0).getExtract().replaceAll("\\<.*?>", "");
+                    text = text.trim();
+                    holder.tvPlaceDescription.setText(text);
                 }
             }, new Response.ErrorListener() {
                 @Override

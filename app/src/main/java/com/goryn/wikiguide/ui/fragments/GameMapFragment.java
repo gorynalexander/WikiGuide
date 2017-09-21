@@ -63,7 +63,7 @@ public class GameMapFragment extends Fragment {
                     return;
                 }
                 App.getLocationManager().updateMap(googleMap);
-                App.getLocationManager().setMarkers(App.getQuery());
+                //App.getLocationManager().setMarkers(App.getQuery());
 
                 //googleMap.setMyLocationEnabled(true);
 

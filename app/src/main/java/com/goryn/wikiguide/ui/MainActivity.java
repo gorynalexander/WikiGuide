@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude, latLng.longitude);
 
-        Call<QueryResult> call = service.request(geo, 10000, 1000);
+        Call<QueryResult> call = service.request(geo, 5000, 144);
 
 
         call.enqueue(new retrofit2.Callback<QueryResult>() {
