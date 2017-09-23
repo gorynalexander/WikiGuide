@@ -84,6 +84,10 @@ public class Page {
         return thumbnail != null ? thumbnail.source() : null;
     }
 
+    public String getImage(){
+        return thumbnail != null ? thumbnail.getOriginal() : null;
+    }
+
     public int getThumbWidth() {
         return thumbnail.getWidth();
     }
@@ -124,9 +128,19 @@ public class Page {
         @SuppressWarnings("unused")
         private int height;
 
+
+        @Expose
+        @SerializedName("original")
+        private String original;
+
         String source() {
             return source;
         }
+
+        public String getOriginal() {
+            return original;
+        }
+
     }
 
 }

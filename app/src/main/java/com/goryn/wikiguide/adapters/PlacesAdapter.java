@@ -75,7 +75,8 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
 //        if (page.getTerms().getDescription() != null) holder.tvPlaceDescription.setText(page.getTerms().getDescription().get(0));
 
         Picasso.with(holder.itemView.getContext())
-                .load(page.getThumbUrl())
+                .load(page.getImage())
+                .resize(1100, 0)
                 .into(holder.ivPlaceImage);
         holder.btnPlaceReadmore.setOnClickListener(new View.OnClickListener() {
             @Override
