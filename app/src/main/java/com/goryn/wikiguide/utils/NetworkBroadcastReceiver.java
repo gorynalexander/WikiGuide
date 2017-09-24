@@ -12,9 +12,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.ui.MainActivity;
 
-/**
- * Created by Саша on 28.08.2017.
- */
 
 public class NetworkBroadcastReceiver extends BroadcastReceiver{
 

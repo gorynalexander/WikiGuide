@@ -62,17 +62,11 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
         final Page page = pagesList.get(position);
 
         holder.tvPlaceDescription.setVisibility(View.GONE);
-//        if (page.getExtract() != null) {
-//            String text = page.getExtract().replaceAll("\\<.*?>", "");
-//            text = text.trim();
-//            holder.tvPlaceDescription.setText(text);
-//        }
+
 
 
         holder.tvPlaceTitle.setText(page.getTitle());
 
-
-//        if (page.getTerms().getDescription() != null) holder.tvPlaceDescription.setText(page.getTerms().getDescription().get(0));
 
         Picasso.with(holder.itemView.getContext())
                 .load(page.getImage())

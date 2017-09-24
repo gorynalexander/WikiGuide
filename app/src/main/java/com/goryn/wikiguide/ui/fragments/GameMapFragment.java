@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -15,7 +16,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -23,20 +32,23 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.managers.LocationManager;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.Query;
+import com.goryn.wikiguide.model.QueryResult;
+import com.orhanobut.dialogplus.DialogPlus;
+import com.orhanobut.dialogplus.ViewHolder;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Odinn on 19.07.2017.
- */
 
 public class GameMapFragment extends Fragment {
     MapView map;
@@ -59,20 +71,25 @@ public class GameMapFragment extends Fragment {
                     //                                          int[] grantResults)
                     // to handle the case where the user grants the permission. See the documentation
                     // for ActivityCompat#requestPermissions for more details.
-                    //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(46.4724973,30.7360218), 15));
                     return;
                 }
                 App.getLocationManager().updateMap(googleMap);
-                //App.getLocationManager().setMarkers(App.getQuery());
 
-                //googleMap.setMyLocationEnabled(true);
+                googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        setMarkerInfo(marker);
+                        return true;
+                    }
+                });
+                App.getLocationManager().setMarkers(App.getQuery());
 
             }
         });
 
         return view;
     }
-
 
 
     @Override
@@ -98,4 +115,47 @@ public class GameMapFragment extends Fragment {
         map.onLowMemory();
         super.onLowMemory();
     }
+
+    private void setMarkerInfo(final Marker marker) {
+        if (marker.getTitle().equals("Your pos")){
+            return;
+        }
+
+        String url = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts|pageimages&piprop=thumbnail&pithumbsize=700&exintro=1&formatversion=2&titles=" + marker.getTitle();
+        RequestQueue queue = Volley.newRequestQueue(getContext());
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url.replaceAll(" ", "%20"), new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                QueryResult result;
+                Gson gson = new Gson();
+                result = gson.fromJson(response, QueryResult.class);
+                String text = result.getQuery().getPages().get(0).getExtract().replaceAll("\\<.*?>", "");
+                text = text.trim();
+
+
+                DialogPlus dialog = DialogPlus.newDialog(getContext())
+                        .setExpanded(true)
+                        .setContentHolder(new ViewHolder(R.layout.dialog_place_info))
+                        .setContentHeight(ViewGroup.LayoutParams.WRAP_CONTENT + 200)
+                        .create();
+
+                View view = dialog.getHolderView();
+                TextView tvTitle = (TextView) view.findViewById(R.id.tv_dialog_place_title);
+                TextView tvExtract = (TextView) view.findViewById(R.id.tv_dialog_place_extract);
+                ImageView ivImage = (ImageView) view.findViewById(R.id.iv_dialog_place_image);
+
+                tvExtract.setText(text);
+                Picasso.with(getContext()).load(result.getQuery().getPages().get(0).getThumbUrl()).into(ivImage);
+                tvTitle.setText(marker.getTitle());
+                dialog.show();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        queue.add(stringRequest);
+    }
+
 }

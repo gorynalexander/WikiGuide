@@ -57,8 +57,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     Fragment fragment;
 
     /*  Location   */
-    private Location myLocation;
-    private LocationRequest mLocationRequest;
     private GoogleApiClient googleApiClient;
     private LatLng currentLatLng;
 
@@ -67,9 +65,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private PlacesFragment placesFragment;
 
     private NetworkBroadcastReceiver broadcastReceiver;
-
-    /*Retrofit */
-//    private WikiQueryService service;
 
 
     @Override
@@ -165,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
                 App.setQuery(response.body().getQuery());
                 placesFragment.notifyDataFromActivity();
-//                loadWikiPages(response.body().getQuery().getPages());
             }
 
             @Override
@@ -175,47 +169,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         });
     }
 
-    private void loadWikiPages(List<Page> pages) {
-        String titles = "";
-        for (int i = 0; i < pages.size(); i++) {
-            if (i == pages.size() - 1) {
-                titles += pages.get(i).getTitle();
-            } else titles += pages.get(i).getTitle() + "|";
-        }
-        String requestTitles = titles.replaceAll(" ", "%20");
-        Log.i("WIKIGUIDE", requestTitles);
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&exintro=1&formatversion=2&titles="+requestTitles;
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url.replaceAll(" ", "%20"), new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                Log.i("WIKIGUIDE_RESPONSE", response);
-                QueryResult result;
-                Gson gson = new Gson();
-                result = gson.fromJson(response, QueryResult.class);
-                App.setWikiQuery(result.getQuery());
-                placesFragment.notifyDataFromActivity();
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        });
-        queue.add(stringRequest);
-
-
-    }
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
         App.getLocationManager().startLocationUpdates();
         currentLatLng = new LatLng(App.getLocationManager().getCurrentLocation().getLatitude(), App.getLocationManager().getCurrentLocation().getLongitude());
-        String str = Double.toString(currentLatLng.latitude) + Double.toString(currentLatLng.longitude);
 
         makeRequestToWiki(currentLatLng);
 

@@ -98,6 +98,7 @@ public class LocationManager implements LocationListener {
         .strokeColor(Color.BLUE));
 
         setMarkers(App.getQuery());
+
     }
 
 
