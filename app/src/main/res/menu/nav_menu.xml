@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/nav_main"
+        android:id="@+id/action_nav_main"
         android:icon="@drawable/ic_home_black_18dp"
         android:title="Список мест" />
     <item
-        android:id="@+id/nav_map"
+        android:id="@+id/action_nav_map"
         android:icon="@drawable/ic_map_black_18dp"
         android:title="Карта"/>
-    <item
-        android:id="@+id/nav_settings"
-        android:icon="@drawable/ic_map_black_18dp"
-        android:title="Настройки"/>
 </menu>
