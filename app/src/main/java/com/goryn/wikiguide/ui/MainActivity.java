@@ -2,6 +2,7 @@ package com.goryn.wikiguide.ui;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.os.Build;
@@ -22,6 +23,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -71,6 +73,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private NetworkBroadcastReceiver broadcastReceiver;
 
+    private float placesCount;
+    private float radius;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,17 +84,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         initNavDrawer();
 
+        initPreferences();
         buildGoogleAPiClient();
 
-        broadcastReceiver = new NetworkBroadcastReceiver();
-        broadcastReceiver.setActivityHandler(this);
-        registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        //broadcastReceiver = new NetworkBroadcastReceiver();
+        //broadcastReceiver.setActivityHandler(this);
+        //registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         // TODO : UNREGISTER BROADCAST RECIEVING
 
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(0);
         }
 
+    }
+
+    private void initPreferences() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        radius = Float.parseFloat(sharedPreferences.getString("pref_radius", "5000"));
+        placesCount = Float.parseFloat(sharedPreferences.getString("pref_count", "25"));
     }
 
     private void buildGoogleAPiClient() {
@@ -241,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     protected void onStop() {
         super.onStop();
-        unregisterReceiver(broadcastReceiver);
+        //unregisterReceiver(broadcastReceiver);
     }
 
     @Override
