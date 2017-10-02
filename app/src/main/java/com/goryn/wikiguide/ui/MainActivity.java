@@ -54,7 +54,9 @@ import retrofit2.Call;
 import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
+                                                                GoogleApiClient.ConnectionCallbacks,
+                                                                SharedPreferences.OnSharedPreferenceChangeListener {
 
     FragmentManager fragmentManager;
     Fragment fragment;
@@ -73,8 +75,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private NetworkBroadcastReceiver broadcastReceiver;
 
-    private float placesCount;
-    private float radius;
+    private int placesCount;
+    private int radius;
 
 
     @Override
@@ -101,8 +103,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void initPreferences() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        radius = Float.parseFloat(sharedPreferences.getString("pref_radius", "5000"));
-        placesCount = Float.parseFloat(sharedPreferences.getString("pref_count", "25"));
+        radius = Integer.parseInt(sharedPreferences.getString("pref_radius", "5000"));
+        placesCount = Integer.parseInt(sharedPreferences.getString("pref_count", "25"));
+
+        Log.i("PREFERENCE", radius + "m " + placesCount);
     }
 
     private void buildGoogleAPiClient() {
@@ -125,10 +129,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-
         drawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-
-        //mDrawerList.setOnClickListener(new DrawerItemClickListener());
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -182,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
 
-
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude, latLng.longitude);
 
-        Call<QueryResult> call = service.request(geo, 5000, 144);
+        Call<QueryResult> call = service.request(geo, radius, 144, placesCount);
 
 
         call.enqueue(new retrofit2.Callback<QueryResult>() {
@@ -282,5 +282,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+
+    }
 }
 

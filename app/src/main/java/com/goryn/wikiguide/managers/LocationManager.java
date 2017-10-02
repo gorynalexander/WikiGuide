@@ -29,6 +29,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
@@ -45,9 +46,6 @@ import java.util.List;
 
 import static java.security.AccessController.getContext;
 
-/**
- * Created by Odinn on 27.07.2017.
- */
 
 public class LocationManager implements LocationListener {
     private Location previuousLocation, currentLocation;
@@ -56,15 +54,18 @@ public class LocationManager implements LocationListener {
     private GoogleMap googleMap;
     private LocationRequest locationRequest;
 
+    private Marker userMarker;
+
     public LocationManager(Context context) {
         this.context = context;
         createLocationRequest();
     }
 
+
     private void createLocationRequest() {
         locationRequest = new LocationRequest();
         locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(1000);
+        locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
     }
@@ -87,9 +88,10 @@ public class LocationManager implements LocationListener {
         }
         map.setMyLocationEnabled(false);
         LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        map.addMarker(new MarkerOptions()
+
+        userMarker = map.addMarker(new MarkerOptions()
         .position(latLng)
-        .title("Your pos"));
+        .title("Your position"));
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 12.0f));
 
         map.addCircle(new CircleOptions()
@@ -109,6 +111,10 @@ public class LocationManager implements LocationListener {
     @Override
     public void onLocationChanged(Location location) {
         currentLocation = location;
+
+        LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+        if (userMarker != null) setUserMarker(currentLatLng);
+
     }
 
 
@@ -134,11 +140,8 @@ public class LocationManager implements LocationListener {
         LocationServices.FusedLocationApi.removeLocationUpdates(App.getGoogleApiClient(), this);
     }
 
-    public void setUserMarker() {
-        LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        googleMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .title("Your pos"));
+    public void setUserMarker(LatLng latLng) {
+        userMarker.setPosition(latLng);
     }
 
     public void setMarkers(Query result) {
@@ -176,4 +179,5 @@ public class LocationManager implements LocationListener {
         customMarkerView.draw(canvas);
         return returnedBitmap;
     }
+
 }
