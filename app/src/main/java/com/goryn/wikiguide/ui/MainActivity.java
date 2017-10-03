@@ -1,13 +1,10 @@
 package com.goryn.wikiguide.ui;
 
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.net.ConnectivityManager;
-import android.os.Build;
+import android.location.LocationManager;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 
@@ -29,10 +26,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Toast;
 
 
@@ -42,8 +35,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
+import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.QueryResult;
-import com.goryn.wikiguide.ui.fragments.GameMapFragment;
+import com.goryn.wikiguide.ui.fragments.MapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
 import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
 import com.goryn.wikiguide.utils.WikiQueryService;
@@ -102,11 +96,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void initPreferences() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
         radius = Integer.parseInt(sharedPreferences.getString("pref_radius", "5000"));
+        App.getLocationManager().setUserCircleRadius(radius);
         placesCount = Integer.parseInt(sharedPreferences.getString("pref_count", "25"));
-
-        Log.i("PREFERENCE", radius + "m " + placesCount);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     private void buildGoogleAPiClient() {
@@ -169,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                         fragment = placesFragment;
                         break;
                     case R.id.action_nav_map:
-                        fragment = new GameMapFragment();
+                        fragment = new MapFragment();
                         break;
                 }
 
@@ -207,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         WikiQueryService service = retrofit.create(WikiQueryService.class);
 
         String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude, latLng.longitude);
-
+        Log.i("NEW REQUEST", ""+ placesCount);
         Call<QueryResult> call = service.request(geo, radius, 144, placesCount);
 
 
@@ -216,6 +209,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
                 App.setQuery(response.body().getQuery());
                 placesFragment.notifyDataFromActivity();
+                // TODO: UPDATE MAP IF IT'S ALIVE
+
             }
 
             @Override
@@ -271,6 +266,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         switch (item.getItemId()) {
             case R.id.action_update:
                 makeRequestToWiki(currentLatLng);
+                App.getLocationManager().setMarkers(App.getQuery());
                 return true;
             case R.id.action_settings:
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -284,7 +280,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_count_key))){
+            placesCount = Integer.parseInt(sharedPreferences.getString("pref_count", "25"));
+            makeRequestToWiki(App.getLocationManager().getCurrentLatLng());
+            App.getLocationManager().setMarkers(App.getQuery());
 
+        } else if (key.equals(getString(R.string.pref_radius_key))){
+            radius = Integer.parseInt(sharedPreferences.getString("pref_radius", "5000"));
+            App.getLocationManager().setUserCircleRadius(radius);
+            makeRequestToWiki(App.getLocationManager().getCurrentLatLng());
+        }
     }
 }
 

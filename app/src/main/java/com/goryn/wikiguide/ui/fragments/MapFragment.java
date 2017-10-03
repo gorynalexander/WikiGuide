@@ -2,6 +2,7 @@ package com.goryn.wikiguide.ui.fragments;
 
 
 import android.Manifest;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -12,6 +13,7 @@ import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,7 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class GameMapFragment extends Fragment {
+public class MapFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     MapView map;
 
     @Nullable
@@ -87,7 +89,8 @@ public class GameMapFragment extends Fragment {
 
             }
         });
-
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         return view;
     }
 
@@ -158,4 +161,8 @@ public class GameMapFragment extends Fragment {
         queue.add(stringRequest);
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+//        App.getLocationManager().setMarkers(App.getQuery());
+    }
 }

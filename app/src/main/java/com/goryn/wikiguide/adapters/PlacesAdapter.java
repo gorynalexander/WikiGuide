@@ -35,8 +35,8 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
     }
 
     public void setPagesList(List<Page> pagesList) {
+        this.pagesList.clear();
         checkData(pagesList);
-
         notifyDataSetChanged();
     }
 

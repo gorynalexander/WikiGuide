@@ -2,6 +2,7 @@ package com.goryn.wikiguide.managers;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Debug;
 import android.provider.MediaStore;
 import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
@@ -27,6 +29,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -55,6 +58,10 @@ public class LocationManager implements LocationListener {
     private LocationRequest locationRequest;
 
     private Marker userMarker;
+    private Circle userCircle;
+    private int circleRadius = 5000;
+
+    private List<Marker> markers = new ArrayList<>();
 
     public LocationManager(Context context) {
         this.context = context;
@@ -94,9 +101,9 @@ public class LocationManager implements LocationListener {
         .title("Your position"));
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 12.0f));
 
-        map.addCircle(new CircleOptions()
+        userCircle = map.addCircle(new CircleOptions()
         .center(latLng)
-        .radius(5000)
+        .radius(circleRadius)
         .strokeColor(Color.BLUE));
 
         setMarkers(App.getQuery());
@@ -106,6 +113,9 @@ public class LocationManager implements LocationListener {
 
     public Location getCurrentLocation() {
         return currentLocation;
+    }
+    public LatLng getCurrentLatLng(){
+        return new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
     }
 
     @Override
@@ -142,14 +152,29 @@ public class LocationManager implements LocationListener {
 
     public void setUserMarker(LatLng latLng) {
         userMarker.setPosition(latLng);
+        userCircle.setCenter(latLng);
+    }
+    public void setUserCircleRadius(int radius){
+        circleRadius = radius;
+        if (userCircle != null){
+            userCircle.setRadius(radius);
+        }
     }
 
+
     public void setMarkers(Query result) {
+        if (markers != null){
+            for (Marker marker : markers){
+                marker.remove();
+                Log.i("TAAAAG", marker.getTitle());
+            }
+        }
         for (Page page : result.getPages()) {
             Log.i("MAP_DEBUGING", "123");
             if (page.getCoordinates() != null) {
                 Log.i("MAP_DEBUGING", page.getTitle());
-                googleMap.addMarker(createMarkerOptions(page));
+                Marker marker = googleMap.addMarker(createMarkerOptions(page));
+                markers.add(marker);
             }
         }
 

@@ -57,13 +57,4 @@ public class App extends Application {
         return getInstance().query;
     }
 
-    public static void setWikiQuery(Query wikiQuery) {
-
-        List<Page> query = getInstance().query.getPages();
-        for (int i = 0; i < query.size(); i++){
-            query.get(i).setExtract(wikiQuery.getPages().get(i).getExtract());
-        }
-
-        getInstance().wQuery = wikiQuery;
-    }
 }
