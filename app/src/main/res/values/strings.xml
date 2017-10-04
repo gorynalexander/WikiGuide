@@ -10,7 +10,7 @@
 
     <!--PREFERENCES-->
     <string name="pref_radius_key"> pref_radius </string>
-    <string name="pref_radius_title"> Count (max 50) </string>
+    <string name="pref_radius_title"> Radius (max 10000) </string>
     <string name="pref_radius_value_default"> 5000 </string>
 
     <string name="pref_count_key"> pref_count </string>

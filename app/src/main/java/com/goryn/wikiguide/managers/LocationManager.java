@@ -154,12 +154,17 @@ public class LocationManager implements LocationListener {
         userMarker.setPosition(latLng);
         userCircle.setCenter(latLng);
     }
+    public void removeUserMarker(){
+        userMarker.remove();
+        userCircle.remove();
+    }
     public void setUserCircleRadius(int radius){
         circleRadius = radius;
         if (userCircle != null){
             userCircle.setRadius(radius);
         }
     }
+
 
 
     public void setMarkers(Query result) {

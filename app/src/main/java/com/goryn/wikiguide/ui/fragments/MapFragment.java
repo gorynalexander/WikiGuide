@@ -61,7 +61,16 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         map = (MapView) view.findViewById(R.id.mapView);
         map.onCreate(savedInstanceState);
+        Log.i("FRAGMENT", "onCreateView");
 
+        return view;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        map.onResume();
         map.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
@@ -91,26 +100,22 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         });
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        return view;
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        map.onResume();
+        Log.i("FRAGMENT", "onResume");
     }
 
     @Override
     public void onPause() {
         map.onPause();
         super.onPause();
+        Log.i("FRAGMENT", "onPause");
+        App.getLocationManager().removeUserMarker();
     }
 
     @Override
     public void onDestroy() {
         map.onDestroy();
         super.onDestroy();
+        Log.i("FRAGMENT", "onDestroy");
     }
 
     @Override
@@ -163,6 +168,6 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-//        App.getLocationManager().setMarkers(App.getQuery());
+        App.getLocationManager().setMarkers(App.getQuery());
     }
 }
