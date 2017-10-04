@@ -36,7 +36,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.TravelMode;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.managers.LocationManager;
@@ -47,9 +54,12 @@ import com.orhanobut.dialogplus.DialogPlus;
 import com.orhanobut.dialogplus.ViewHolder;
 import com.squareup.picasso.Picasso;
 
+import org.joda.time.DateTime;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public class MapFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -73,7 +83,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         map.onResume();
         map.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onMapReady(GoogleMap googleMap) {
+            public void onMapReady(final GoogleMap googleMap) {
                 if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     // TODO: Consider calling
                     //    ActivityCompat#requestPermissions
@@ -90,7 +100,13 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
                     @Override
                     public boolean onMarkerClick(Marker marker) {
+                        com.google.maps.model.LatLng placePos = new com.google.maps.model.LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
                         setMarkerInfo(marker);
+                        DirectionsResult results = requestDirection(TravelMode.WALKING,
+                                App.getLocationManager().getCurrentUserLatLng(),
+                                placePos);
+                        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+                        googleMap.addPolyline(new PolylineOptions().addAll(decodedPath));
                         return true;
                     }
                 });
@@ -101,6 +117,37 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
         Log.i("FRAGMENT", "onResume");
+    }
+
+    private GeoApiContext geoApiContextBuilder() {
+        GeoApiContext geoApiContext = new GeoApiContext();
+        geoApiContext.setApiKey(getString(R.string.directions_api_key))
+                .setConnectTimeout(1, TimeUnit.SECONDS)
+                .setConnectTimeout(1, TimeUnit.SECONDS)
+                .setReadTimeout(1, TimeUnit.SECONDS)
+                .setWriteTimeout(1, TimeUnit.SECONDS);
+
+        return geoApiContext;
+    }
+
+    private DirectionsResult requestDirection(TravelMode travelMode, com.google.maps.model.LatLng user, com.google.maps.model.LatLng destination) {
+        DateTime time = DateTime.now();
+        DirectionsResult result = null;
+        try {
+            result = DirectionsApi.newRequest(geoApiContextBuilder())
+                    .mode(travelMode)
+                    .origin(user)
+                    .destination(destination)
+                    .departureTime(time)
+                    .await();
+        } catch (ApiException e) {
+            Log.e("ERROR_DIRECTION", e.getMessage());
+        } catch (InterruptedException e) {
+            Log.e("ERROR_DIRECTION", e.getMessage());
+        } catch (IOException e) {
+            Log.e("ERROR_DIRECTION", e.getMessage());
+        }
+        return result;
     }
 
     @Override
@@ -125,7 +172,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
     }
 
     private void setMarkerInfo(final Marker marker) {
-        if (marker.getTitle().equals("Your pos")){
+        if (marker.getTitle().equals("Your pos")) {
             return;
         }
 

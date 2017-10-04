@@ -33,6 +33,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.GeoApiContext;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.model.Page;
@@ -43,14 +44,15 @@ import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
 import com.goryn.wikiguide.utils.WikiQueryService;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
-                                                                GoogleApiClient.ConnectionCallbacks,
-                                                                SharedPreferences.OnSharedPreferenceChangeListener {
+        GoogleApiClient.ConnectionCallbacks,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     FragmentManager fragmentManager;
     Fragment fragment;
@@ -83,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         initPreferences();
         buildGoogleAPiClient();
 
+
         //broadcastReceiver = new NetworkBroadcastReceiver();
         //broadcastReceiver.setActivityHandler(this);
         //registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
@@ -93,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
     }
+    
+
 
     private void initPreferences() {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -200,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         WikiQueryService service = retrofit.create(WikiQueryService.class);
 
         String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude, latLng.longitude);
-        Log.i("NEW REQUEST", ""+ placesCount);
+        Log.i("NEW REQUEST", "" + placesCount);
         Call<QueryResult> call = service.request(geo, radius, 144, placesCount);
 
 
@@ -280,12 +285,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_count_key))){
+        if (key.equals(getString(R.string.pref_count_key))) {
             placesCount = Integer.parseInt(sharedPreferences.getString("pref_count", "25"));
             makeRequestToWiki(App.getLocationManager().getCurrentLatLng());
             App.getLocationManager().setMarkers(App.getQuery());
 
-        } else if (key.equals(getString(R.string.pref_radius_key))){
+        } else if (key.equals(getString(R.string.pref_radius_key))) {
             radius = Integer.parseInt(sharedPreferences.getString("pref_radius", "5000"));
             App.getLocationManager().setUserCircleRadius(radius);
             makeRequestToWiki(App.getLocationManager().getCurrentLatLng());

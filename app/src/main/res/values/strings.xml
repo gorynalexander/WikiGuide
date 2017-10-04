@@ -17,6 +17,8 @@
     <string name="pref_count_title"> Count (max 50) </string>
     <string name="pref_count_value_default"> 25 </string>
 
+    <string name="directions_api_key">AIzaSyBmU6E23OqsW0ZIeWSZ31eEHyqN7S7h1iQ</string>
+
 
 
 </resources>

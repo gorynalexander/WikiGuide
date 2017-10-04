@@ -2,6 +2,7 @@ package com.goryn.wikiguide.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.google.maps.model.LatLng;
 
 /**
  * Created by Odinn on 10.08.2017.
@@ -56,6 +57,7 @@ public class Coordinate {
     public void setGlobe(String globe) {
         this.globe = globe;
     }
+
 
 
 }

@@ -44,6 +44,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-base:10.2.6'
     compile 'com.google.android.gms:play-services-location:10.2.6'
     compile 'com.google.android.gms:play-services-maps:10.2.6'
+    compile 'com.google.maps:google-maps-services:0.1.20'
+    compile group: 'com.google.maps.android', name: 'android-maps-utils', version: '0.4'
     compile 'com.google.code.gson:gson:2.7'
 
     /*

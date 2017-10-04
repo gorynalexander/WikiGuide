@@ -117,6 +117,9 @@ public class LocationManager implements LocationListener {
     public LatLng getCurrentLatLng(){
         return new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
     }
+    public com.google.maps.model.LatLng getCurrentUserLatLng(){
+        return new com.google.maps.model.LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+    }
 
     @Override
     public void onLocationChanged(Location location) {
