@@ -6,6 +6,7 @@
     <string name="read_more">READ MORE</string>
     <string name="navigate">NAVIGATE</string>
     <string name="title_activity_settings">Settings</string>
+    <string name="dialog_navigate_button">Navigate</string>
 
 
     <!--PREFERENCES-->
@@ -16,6 +17,9 @@
     <string name="pref_count_key"> pref_count </string>
     <string name="pref_count_title"> Count (max 50) </string>
     <string name="pref_count_value_default"> 25 </string>
+
+
+
 
     <string name="directions_api_key">AIzaSyBmU6E23OqsW0ZIeWSZ31eEHyqN7S7h1iQ</string>
 

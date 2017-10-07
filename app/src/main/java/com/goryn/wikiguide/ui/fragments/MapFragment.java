@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,6 +37,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 import com.google.maps.DirectionsApi;
@@ -64,6 +66,7 @@ import java.util.concurrent.TimeUnit;
 
 public class MapFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener {
     MapView map;
+    Polyline polylineToPlace;
 
     @Nullable
     @Override
@@ -100,13 +103,13 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
                     @Override
                     public boolean onMarkerClick(Marker marker) {
-                        com.google.maps.model.LatLng placePos = new com.google.maps.model.LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
-                        setMarkerInfo(marker);
-                        DirectionsResult results = requestDirection(TravelMode.WALKING,
-                                App.getLocationManager().getCurrentUserLatLng(),
-                                placePos);
-                        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
-                        googleMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+
+                        setMarkerInfo(marker, googleMap);
+
+
+                        marker.showInfoWindow();
+
+
                         return true;
                     }
                 });
@@ -171,7 +174,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         super.onLowMemory();
     }
 
-    private void setMarkerInfo(final Marker marker) {
+    private void setMarkerInfo(final Marker marker, final GoogleMap googleMap) {
         if (marker.getTitle().equals("Your pos")) {
             return;
         }
@@ -198,7 +201,21 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                 TextView tvTitle = (TextView) view.findViewById(R.id.tv_dialog_place_title);
                 TextView tvExtract = (TextView) view.findViewById(R.id.tv_dialog_place_extract);
                 ImageView ivImage = (ImageView) view.findViewById(R.id.iv_dialog_place_image);
+                Button button = (Button) view.findViewById(R.id.btn_dialog_navigate);
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (polylineToPlace != null)  polylineToPlace.remove();
 
+                        com.google.maps.model.LatLng placePos =
+                                    new com.google.maps.model.LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
+                        DirectionsResult results = requestDirection(TravelMode.WALKING,
+                                App.getLocationManager().getCurrentUserLatLng(),
+                                placePos);
+                        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+                        polylineToPlace = googleMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+                    }
+                });
                 tvExtract.setText(text);
                 Picasso.with(getContext()).load(result.getQuery().getPages().get(0).getThumbUrl()).into(ivImage);
                 tvTitle.setText(marker.getTitle());
