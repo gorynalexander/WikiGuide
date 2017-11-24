@@ -1,11 +1,14 @@
 package com.goryn.wikiguide.ui;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 
 import android.support.annotation.NonNull;
@@ -14,6 +17,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 
 
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -79,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         initNavDrawer();
 
         initPreferences();
@@ -89,14 +92,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         //broadcastReceiver = new NetworkBroadcastReceiver();
         //broadcastReceiver.setActivityHandler(this);
         //registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        // TODO : UNREGISTER BROADCAST RECIEVING
+        // TODO : UNREGISTER BROADCAST RECEIVING
 
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(0);
         }
-
     }
-    
+
+
 
 
     private void initPreferences() {
@@ -214,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
                 App.setQuery(response.body().getQuery());
                 placesFragment.notifyDataFromActivity();
+                Log.i("TESTING_URL", response.body().getQuery().getPages().get(0).getThumbUrl());
                 // TODO: UPDATE MAP IF IT'S ALIVE
 
             }

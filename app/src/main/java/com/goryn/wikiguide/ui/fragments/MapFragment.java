@@ -75,10 +75,8 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         map = (MapView) view.findViewById(R.id.mapView);
         map.onCreate(savedInstanceState);
         Log.i("FRAGMENT", "onCreateView");
-
         return view;
     }
-
 
     @Override
     public void onResume() {
@@ -113,7 +111,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                         return true;
                     }
                 });
-                App.getLocationManager().setMarkers(App.getQuery());
+//                App.getLocationManager().setMarkers(App.getQuery());
 
             }
         });
@@ -191,7 +189,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                 text = text.trim();
 
 
-                DialogPlus dialog = DialogPlus.newDialog(getContext())
+                final DialogPlus dialog = DialogPlus.newDialog(getContext())
                         .setExpanded(true)
                         .setContentHolder(new ViewHolder(R.layout.dialog_place_info))
                         .setContentHeight(ViewGroup.LayoutParams.WRAP_CONTENT + 200)
@@ -214,6 +212,9 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                                 placePos);
                         List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
                         polylineToPlace = googleMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+                        dialog.dismiss();
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(App.getLocationManager().getCurrentLatLng().latitude, App.getLocationManager().getCurrentLatLng().longitude), 12.0f));
+
                     }
                 });
                 tvExtract.setText(text);

@@ -36,6 +36,10 @@ public class Page {
     @Expose
     private Thumbnail thumbnail;
 
+    @SerializedName("original")
+    @Expose
+    public Thumbnail original;
+
     @SerializedName("terms")
     @Expose
     private Terms terms;
@@ -45,7 +49,9 @@ public class Page {
     @Expose
     private String extract;
 
-
+    public String getFullImage(){
+        return original.getSource();
+    }
     public String getExtract() {
         return extract;
     }
@@ -81,12 +87,9 @@ public class Page {
 
     @Nullable
     public String getThumbUrl() {
-        return thumbnail != null ? thumbnail.source() : null;
+        return thumbnail.getSource();
     }
 
-    public String getImage(){
-        return thumbnail != null ? thumbnail.getOriginal() : null;
-    }
 
     public int getThumbWidth() {
         return thumbnail.getWidth();
@@ -113,8 +116,20 @@ public class Page {
     }
 
     static class Thumbnail {
-        @SuppressWarnings("unused")
-        private String source;
+
+        @SerializedName("source")
+        @Expose
+        public String source;
+        @SerializedName("width")
+        @Expose
+        public int width;
+        @SerializedName("height")
+        @Expose
+        public int height;
+
+        public String getSource() {
+            return source;
+        }
 
         public int getWidth() {
             return width;
@@ -123,25 +138,6 @@ public class Page {
         public int getHeight() {
             return height;
         }
-
-        @SuppressWarnings("unused")
-        private int width;
-        @SuppressWarnings("unused")
-        private int height;
-
-
-        @Expose
-        @SerializedName("original")
-        private String original;
-
-        String source() {
-            return source;
-        }
-
-        public String getOriginal() {
-            return original;
-        }
-
     }
 
 }

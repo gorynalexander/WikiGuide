@@ -19,8 +19,11 @@
     <string name="pref_count_value_default"> 25 </string>
 
 
+    <!--facebook-->
+    <string name="facebook_app_id">495895904099577</string>
+    <string name="fb_login_protocol_scheme">fb495895904099577</string>
 
-
+    <!--DIRECTIONS GOOGLE API-->
     <string name="directions_api_key">AIzaSyBmU6E23OqsW0ZIeWSZ31eEHyqN7S7h1iQ</string>
 
 

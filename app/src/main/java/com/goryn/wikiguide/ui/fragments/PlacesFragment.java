@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,7 @@ public class PlacesFragment extends Fragment {
             rvPlaces.setLayoutManager(layoutManager);
             rvPlacesAdapter = new PlacesAdapter(pagesList);
             rvPlaces.setAdapter(rvPlacesAdapter);
+
         } else {
             Toast.makeText(getContext(), "NULL", Toast.LENGTH_SHORT).show();
             // TODO SHOW MESSAGE THAT NO PLACES DETECTED OR BAD CONNECTION

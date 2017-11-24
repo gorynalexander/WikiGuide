@@ -15,6 +15,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
@@ -64,14 +65,17 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
         holder.tvPlaceDescription.setVisibility(View.GONE);
 
 
-
         holder.tvPlaceTitle.setText(page.getTitle());
 
 
-        Picasso.with(holder.itemView.getContext())
-                .load(page.getImage())
-                .resize(1100, 0)
+        Glide.with(holder.itemView.getContext())
+                .load(page.getFullImage())
                 .into(holder.ivPlaceImage);
+
+//        Picasso.with(holder.itemView.getContext())
+//                .load(page.getFullImage())
+//                .into(holder.ivPlaceImage);
+        Log.i("TEST2", page.getFullImage());
         holder.btnPlaceReadmore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -1,6 +1,7 @@
 package com.goryn.wikiguide.managers;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -17,11 +18,13 @@ import android.os.Debug;
 import android.provider.MediaStore;
 import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -65,7 +68,37 @@ public class LocationManager implements LocationListener {
 
     public LocationManager(Context context) {
         this.context = context;
+        askForPermissions();
         createLocationRequest();
+    }
+
+    private void askForPermissions() {
+        if (ContextCompat.checkSelfPermission(context,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions((Activity) context,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+
     }
 
 
@@ -97,14 +130,14 @@ public class LocationManager implements LocationListener {
         LatLng latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
 
         userMarker = map.addMarker(new MarkerOptions()
-        .position(latLng)
-        .title("Your position"));
+                .position(latLng)
+                .title("Your position"));
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()), 12.0f));
 
         userCircle = map.addCircle(new CircleOptions()
-        .center(latLng)
-        .radius(circleRadius)
-        .strokeColor(Color.BLUE));
+                .center(latLng)
+                .radius(circleRadius)
+                .strokeColor(Color.BLUE));
 
         setMarkers(App.getQuery());
 
@@ -114,10 +147,12 @@ public class LocationManager implements LocationListener {
     public Location getCurrentLocation() {
         return currentLocation;
     }
-    public LatLng getCurrentLatLng(){
+
+    public LatLng getCurrentLatLng() {
         return new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
     }
-    public com.google.maps.model.LatLng getCurrentUserLatLng(){
+
+    public com.google.maps.model.LatLng getCurrentUserLatLng() {
         return new com.google.maps.model.LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
     }
 
@@ -157,22 +192,23 @@ public class LocationManager implements LocationListener {
         userMarker.setPosition(latLng);
         userCircle.setCenter(latLng);
     }
-    public void removeUserMarker(){
+
+    public void removeUserMarker() {
         userMarker.remove();
         userCircle.remove();
     }
-    public void setUserCircleRadius(int radius){
+
+    public void setUserCircleRadius(int radius) {
         circleRadius = radius;
-        if (userCircle != null){
+        if (userCircle != null) {
             userCircle.setRadius(radius);
         }
     }
 
 
-
     public void setMarkers(Query result) {
-        if (markers != null){
-            for (Marker marker : markers){
+        if (markers != null) {
+            for (Marker marker : markers) {
                 marker.remove();
                 Log.i("TAAAAG", marker.getTitle());
             }
@@ -189,16 +225,20 @@ public class LocationManager implements LocationListener {
     }
 
     public MarkerOptions createMarkerOptions(Page page) {
+        Log.i("CreateMarkerOptions", page.getThumbUrl());
         return new MarkerOptions()
                 .position(new LatLng(page.getCoordinates().get(0).getLat(), page.getCoordinates().get(0).getLon()))
-                .title(page.getTitle())
-                .icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromImageUrl(page.getThumbUrl())));
+                .title(page.getTitle());
+               // .icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromImageUrl(page.getThumbUrl())));
     }
 
-    private Bitmap createBitmapFromImageUrl(String url){
-        View customMarkerView = ((LayoutInflater)  context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.image_marker, null);
+    private Bitmap createBitmapFromImageUrl(String url) {
+        View customMarkerView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.image_marker, null);
         ImageView ivMarker = (ImageView) customMarkerView.findViewById(R.id.ivPhotoMarker);
-        Picasso.with(context).load(url).into(ivMarker);
+        Glide.with(context)
+                .load(url)
+                .into(ivMarker);
+//        Picasso.with(context).load(url).into(ivMarker);
         customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
         customMarkerView.buildDrawingCache();
@@ -206,7 +246,7 @@ public class LocationManager implements LocationListener {
         Canvas canvas = new Canvas(returnedBitmap);
         canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_IN);
         Drawable drawable = customMarkerView.getBackground();
-        if (drawable != null){
+        if (drawable != null) {
             drawable.draw(canvas);
         }
         customMarkerView.draw(canvas);
