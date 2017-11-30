@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.provider.MediaStore;
 import android.provider.SyncStateContract;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -25,6 +26,10 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -50,6 +55,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 import static java.security.AccessController.getContext;
 
 
@@ -68,38 +75,10 @@ public class LocationManager implements LocationListener {
 
     public LocationManager(Context context) {
         this.context = context;
-        askForPermissions();
         createLocationRequest();
     }
 
-    private void askForPermissions() {
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
 
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions((Activity) context,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        1);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }
-
-    }
 
 
     private void createLocationRequest() {
@@ -228,17 +207,18 @@ public class LocationManager implements LocationListener {
         Log.i("CreateMarkerOptions", page.getThumbUrl());
         return new MarkerOptions()
                 .position(new LatLng(page.getCoordinates().get(0).getLat(), page.getCoordinates().get(0).getLon()))
-                .title(page.getTitle());
-               // .icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromImageUrl(page.getThumbUrl())));
+                .title(page.getTitle())
+                .icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromImageUrl(page.getThumbUrl())));
     }
 
     private Bitmap createBitmapFromImageUrl(String url) {
         View customMarkerView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.image_marker, null);
-        ImageView ivMarker = (ImageView) customMarkerView.findViewById(R.id.ivPhotoMarker);
-        Glide.with(context)
-                .load(url)
-                .into(ivMarker);
+        CircleImageView ivMarker = (CircleImageView) customMarkerView.findViewById(R.id.ivPhotoMarker);
+//        Glide.with(context)
+//                .load(url)
+//                .into(ivMarker);
 //        Picasso.with(context).load(url).into(ivMarker);
+
         customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
         customMarkerView.buildDrawingCache();
@@ -250,6 +230,7 @@ public class LocationManager implements LocationListener {
             drawable.draw(canvas);
         }
         customMarkerView.draw(canvas);
+
         return returnedBitmap;
     }
 
