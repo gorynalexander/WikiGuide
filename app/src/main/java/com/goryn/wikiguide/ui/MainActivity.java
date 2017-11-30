@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.support.annotation.Nullable;
@@ -51,6 +52,9 @@ import com.goryn.wikiguide.ui.fragments.MapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
 import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
 import com.goryn.wikiguide.utils.WikiQueryService;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.Locale;
@@ -134,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        ImageView imageView =  new ImageView(App.getContext());
+        final ImageView imageView =  new ImageView(App.getContext());
 //                Glide.with(App.getContext())
 //                .load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg")
 //                .into(imageView);
@@ -150,15 +154,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         });
         pBuilder.build().load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg").into(imageView);
-//                Picasso.with(imageView.getContext()).load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg").into(imageView);
+                Picasso.with(imageView.getContext()).load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg").into(imageView);
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
+                .build();
+         ImageLoader.getInstance().init(config); // Get singleton instance
+
+
         builder.setTitle("DSDS");
         builder.setView(imageView);
-        builder.show();
-
+       // builder.show();
 
     }
-
-
 
 
     private void initPreferences() {
@@ -275,6 +281,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
                 App.setQuery(response.body().getQuery());
+                Log.i("DATA", response.toString());
                 placesFragment.notifyDataFromActivity();
                 Log.i("TESTING_URL", response.body().getQuery().getPages().get(0).getThumbUrl());
                 // TODO: UPDATE MAP IF IT'S ALIVE
@@ -334,7 +341,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         switch (item.getItemId()) {
             case R.id.action_update:
                 makeRequestToWiki(currentLatLng);
-                App.getLocationManager().setMarkers(App.getQuery());
+                App.getLocationManager().loadImages();
                 return true;
             case R.id.action_settings:
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -351,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if (key.equals(getString(R.string.pref_count_key))) {
             placesCount = Integer.parseInt(sharedPreferences.getString("pref_count", "25"));
             makeRequestToWiki(App.getLocationManager().getCurrentLatLng());
-            App.getLocationManager().setMarkers(App.getQuery());
+            App.getLocationManager().loadImages();
 
         } else if (key.equals(getString(R.string.pref_radius_key))) {
             radius = Integer.parseInt(sharedPreferences.getString("pref_radius", "5000"));

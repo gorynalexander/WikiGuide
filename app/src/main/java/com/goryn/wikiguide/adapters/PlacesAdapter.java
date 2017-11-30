@@ -46,6 +46,7 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
         while (iterator.hasNext()) {
             Page page = iterator.next();
             if (page.getThumbUrl() == null) {
+                Log.i("tag", page.getTitle());
                 iterator.remove();
             }
         }
