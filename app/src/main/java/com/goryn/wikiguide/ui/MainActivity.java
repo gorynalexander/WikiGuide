@@ -1,11 +1,14 @@
 package com.goryn.wikiguide.ui;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -21,6 +24,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -30,9 +34,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -46,13 +52,17 @@ import com.goryn.wikiguide.ui.fragments.MapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
 import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
 import com.goryn.wikiguide.utils.WikiQueryService;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.squareup.picasso.Picasso;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
-import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
@@ -83,6 +93,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions((Activity) this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+
+        }
+
+
         initNavDrawer();
 
         initPreferences();
@@ -97,9 +136,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if (savedInstanceState == null) {
             navigationView.setCheckedItem(0);
         }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final ImageView imageView =  new ImageView(App.getContext());
+//                Glide.with(App.getContext())
+//                .load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg")
+//                .into(imageView);
+
+        Picasso.Builder pBuilder = new Picasso.Builder(this);
+        pBuilder.listener(new Picasso.Listener()
+        {
+            @Override
+            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception)
+            {
+                Log.e("ERROR_PICASSO", exception.getMessage());
+                exception.printStackTrace();
+            }
+        });
+        pBuilder.build().load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg").into(imageView);
+                Picasso.with(imageView.getContext()).load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg").into(imageView);
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
+                .build();
+         ImageLoader.getInstance().init(config); // Get singleton instance
+
+
+        builder.setTitle("DSDS");
+        builder.setView(imageView);
+       // builder.show();
+
     }
-
-
 
 
     private void initPreferences() {
@@ -216,6 +281,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
                 App.setQuery(response.body().getQuery());
+                Log.i("DATA", response.toString());
                 placesFragment.notifyDataFromActivity();
                 Log.i("TESTING_URL", response.body().getQuery().getPages().get(0).getThumbUrl());
                 // TODO: UPDATE MAP IF IT'S ALIVE
@@ -275,7 +341,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         switch (item.getItemId()) {
             case R.id.action_update:
                 makeRequestToWiki(currentLatLng);
-                App.getLocationManager().setMarkers(App.getQuery());
+                App.getLocationManager().loadImages();
                 return true;
             case R.id.action_settings:
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
@@ -292,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if (key.equals(getString(R.string.pref_count_key))) {
             placesCount = Integer.parseInt(sharedPreferences.getString("pref_count", "25"));
             makeRequestToWiki(App.getLocationManager().getCurrentLatLng());
-            App.getLocationManager().setMarkers(App.getQuery());
+            App.getLocationManager().loadImages();
 
         } else if (key.equals(getString(R.string.pref_radius_key))) {
             radius = Integer.parseInt(sharedPreferences.getString("pref_radius", "5000"));

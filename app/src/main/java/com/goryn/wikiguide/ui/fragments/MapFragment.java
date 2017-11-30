@@ -233,6 +233,6 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        App.getLocationManager().setMarkers(App.getQuery());
+        App.getLocationManager().loadImages();
     }
 }

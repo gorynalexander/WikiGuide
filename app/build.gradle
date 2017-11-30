@@ -51,10 +51,13 @@ dependencies {
     /*
      * NETWORKING
      */
-    compile 'com.squareup.retrofit2:retrofit:2.3.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta3'
+
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.android.volley:volley:1.0.0'
 
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
+
+    compile 'com.squareup.retrofit2:retrofit:2.3.0'
     /*
      * UI
      */
@@ -63,11 +66,8 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.github.bumptech.glide:glide:4.3.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
-
-    /*
-     * FACEBOOK
-     */
-    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+    compile group: 'com.squareup.okhttp', name: 'okhttp', version: '2.7.5'
 
     testCompile 'junit:junit:4.12'
 }

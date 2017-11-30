@@ -1,36 +1,25 @@
 package com.goryn.wikiguide.managers;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Debug;
-import android.provider.MediaStore;
-import android.provider.SyncStateContract;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
@@ -41,16 +30,13 @@ import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.Query;
-import com.squareup.picasso.Picasso;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import static java.security.AccessController.getContext;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class LocationManager implements LocationListener {
@@ -68,37 +54,7 @@ public class LocationManager implements LocationListener {
 
     public LocationManager(Context context) {
         this.context = context;
-        askForPermissions();
         createLocationRequest();
-    }
-
-    private void askForPermissions() {
-        if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) context,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
-
-                ActivityCompat.requestPermissions((Activity) context,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        1);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        }
-
     }
 
 
@@ -138,9 +94,34 @@ public class LocationManager implements LocationListener {
                 .center(latLng)
                 .radius(circleRadius)
                 .strokeColor(Color.BLUE));
+        loadImages();
+        //setMarkers(App.getQuery());
 
-        setMarkers(App.getQuery());
+    }
 
+    public void loadImages() {
+        List<Page> pages = App.getQuery().getPages();
+        final ImageLoader imageLoader = ImageLoader.getInstance();
+
+        // Updating list of markers to avoid copies
+        if (markers != null) {
+            for (Marker marker : markers) {
+                marker.remove();
+            }
+        }
+
+        for (final Page page : pages) {
+            imageLoader.loadImage(page.getThumbUrl(), new SimpleImageLoadingListener() {
+                @Override
+                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                    // Do whatever you want with Bitmap
+
+                    Marker marker = googleMap.addMarker(createMarkerOptions(page, createBitmapFromView(loadedImage)));
+                    markers.add(marker);
+                }
+            });
+
+        }
     }
 
 
@@ -205,40 +186,39 @@ public class LocationManager implements LocationListener {
         }
     }
 
+//
+//    public void setMarkers(Query result) {
+//        if (markers != null) {
+//            for (Marker marker : markers) {
+//                marker.remove();
+//                Log.i("TAAAAG", marker.getTitle());
+//            }
+//        }
+//        for (Page page : result.getPages()) {
+//            Log.i("MAP_DEBUGING", "123");
+//            if (page.getCoordinates() != null) {
+//                Log.i("MAP_DEBUGING", page.getTitle());
+//                Marker marker = googleMap.addMarker(createMarkerOptions(page));
+//                markers.add(marker);
+//            }
+//        }
+//
+//    }
 
-    public void setMarkers(Query result) {
-        if (markers != null) {
-            for (Marker marker : markers) {
-                marker.remove();
-                Log.i("TAAAAG", marker.getTitle());
-            }
-        }
-        for (Page page : result.getPages()) {
-            Log.i("MAP_DEBUGING", "123");
-            if (page.getCoordinates() != null) {
-                Log.i("MAP_DEBUGING", page.getTitle());
-                Marker marker = googleMap.addMarker(createMarkerOptions(page));
-                markers.add(marker);
-            }
-        }
 
-    }
-
-    public MarkerOptions createMarkerOptions(Page page) {
-        Log.i("CreateMarkerOptions", page.getThumbUrl());
+    public MarkerOptions createMarkerOptions(Page page, Bitmap bitmap) {
         return new MarkerOptions()
                 .position(new LatLng(page.getCoordinates().get(0).getLat(), page.getCoordinates().get(0).getLon()))
-                .title(page.getTitle());
-               // .icon(BitmapDescriptorFactory.fromBitmap(createBitmapFromImageUrl(page.getThumbUrl())));
+                .title(page.getTitle())
+                .icon(BitmapDescriptorFactory.fromBitmap(bitmap));
     }
 
-    private Bitmap createBitmapFromImageUrl(String url) {
+
+    private Bitmap createBitmapFromView(Bitmap bitmap) {
         View customMarkerView = ((LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.image_marker, null);
-        ImageView ivMarker = (ImageView) customMarkerView.findViewById(R.id.ivPhotoMarker);
-        Glide.with(context)
-                .load(url)
-                .into(ivMarker);
-//        Picasso.with(context).load(url).into(ivMarker);
+        CircleImageView ivMarker = (CircleImageView) customMarkerView.findViewById(R.id.ivPhotoMarker);
+
+        ivMarker.setImageBitmap(bitmap);
         customMarkerView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         customMarkerView.layout(0, 0, customMarkerView.getMeasuredWidth(), customMarkerView.getMeasuredHeight());
         customMarkerView.buildDrawingCache();
@@ -250,6 +230,7 @@ public class LocationManager implements LocationListener {
             drawable.draw(canvas);
         }
         customMarkerView.draw(canvas);
+
         return returnedBitmap;
     }
 
