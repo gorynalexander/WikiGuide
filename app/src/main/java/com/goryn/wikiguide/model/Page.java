@@ -9,10 +9,6 @@ import java.util.List;
 
 import javax.xml.transform.Source;
 
-/**
- * Created by Odinn on 10.08.2017.
- */
-
 public class Page {
     @SerializedName("pageid")
     @Expose
@@ -51,6 +47,14 @@ public class Page {
     @SerializedName("extract")
     @Expose
     private String extract;
+
+    public Page(String title, String thumbUrl, float lat, float lon){
+        this.title = title;
+        //thumbnail.source = thumbUrl;
+        coordinates.get(0).setLat(lat);
+        coordinates.get(0).setLon(lon);
+    }
+
 
     @Nullable
     public String getFullImage(){

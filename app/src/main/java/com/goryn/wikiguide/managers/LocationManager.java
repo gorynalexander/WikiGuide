@@ -120,7 +120,6 @@ public class LocationManager implements LocationListener {
                     markers.add(marker);
                 }
             });
-
         }
     }
 

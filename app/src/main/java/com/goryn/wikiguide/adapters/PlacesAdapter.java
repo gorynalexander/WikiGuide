@@ -73,10 +73,7 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder
                 .load(page.getFullImage())
                 .into(holder.ivPlaceImage);
 
-//        Picasso.with(holder.itemView.getContext())
-//                .load(page.getFullImage())
-//                .into(holder.ivPlaceImage);
-        Log.i("TEST2", page.getFullImage());
+
         holder.btnPlaceReadmore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
