@@ -114,7 +114,6 @@ public class LocationManager implements LocationListener {
             imageLoader.loadImage(page.getThumbUrl(), new SimpleImageLoadingListener() {
                 @Override
                 public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                    // Do whatever you want with Bitmap
 
                     Marker marker = googleMap.addMarker(createMarkerOptions(page, createBitmapFromView(loadedImage)));
                     markers.add(marker);

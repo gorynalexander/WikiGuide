@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="10dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/iv_excursion_place"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="14dp" />
+
+    <TextView
+        android:id="@+id/tv_excursion_place_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_toEndOf="@+id/iv_excursion_place"
+        android:layout_toRightOf="@+id/iv_excursion_place"
+        android:textColor="@android:color/black"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tv_excursion_place_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/tv_excursion_place_title"
+        android:layout_alignStart="@+id/tv_excursion_place_title"
+        android:layout_below="@+id/tv_excursion_place_title"
+        android:textSize="16sp" />
+
+</RelativeLayout>

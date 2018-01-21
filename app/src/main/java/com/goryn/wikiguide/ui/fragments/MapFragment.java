@@ -2,6 +2,8 @@ package com.goryn.wikiguide.ui.fragments;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -23,6 +25,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -47,6 +50,8 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.Gson;
 import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
@@ -57,6 +62,7 @@ import com.google.maps.model.TravelMode;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.managers.LocationManager;
+import com.goryn.wikiguide.model.Excursion;
 import com.goryn.wikiguide.model.ExcursionPlace;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.Query;
@@ -69,7 +75,9 @@ import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -96,6 +104,8 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
     private int actionId;
 
+    private DatabaseReference mDatabase;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -114,6 +124,8 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
         bottomSheetHeader = (RelativeLayout) view.findViewById(R.id.bottom_sheet_header);
         bottomSheetHeader.setOnClickListener(this);
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         return view;
     }
 
@@ -167,9 +179,44 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
     }
 
     private void addPlaceToExcursion(Marker marker) {
-        Log.i("Image URL", App.getQuery().getImageURLByTitle(marker.getTitle()));
-        excursionPlaces.add(new ExcursionPlace(marker.getTitle(), "",   marker.getPosition().latitude,  marker.getPosition().longitude));
+        String url = App.getQuery().getImageURLByTitle(marker.getTitle());
+        excursionPlaces.add(new ExcursionPlace(marker.getTitle(), url,   marker.getPosition().latitude,  marker.getPosition().longitude));
         Toast.makeText(getContext(), "Place '"+ marker.getTitle() + "' was added to the excursion list as #"+excursionPlaces.size(), Toast.LENGTH_LONG).show();
+    }
+
+    private void writeNewExcursion(final List<ExcursionPlace> excursions){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Excursion");
+        builder.setMessage("Please, type the title of this excursion");
+
+        final EditText input = new EditText(getContext());
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        builder.setView(input);
+        builder.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (input.getText().equals("")) {
+                    Toast.makeText(getContext(), "Cannot apply apply title", Toast.LENGTH_SHORT).show();
+                } else {
+                    //excursionTitle = input.getText();
+                    String title = input.getText().toString();
+                    Excursion excursion = new Excursion(title, excursions);
+
+                    String key  = mDatabase.child("excursions").push().getKey();
+                    Map<String, Object> excValues = excursion.toMap();
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    childUpdates.put("/excursions/"+ key, excValues);
+                    mDatabase.updateChildren(childUpdates);
+
+                    dialog.dismiss();
+                }
+
+            }
+        });
+        builder.create().show();
+
+
     }
 
     private GeoApiContext geoApiContextBuilder() {
@@ -182,6 +229,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
         return geoApiContext;
     }
+
 
     private DirectionsResult requestDirection(TravelMode travelMode, com.google.maps.model.LatLng user, com.google.maps.model.LatLng destination) {
         DateTime time = DateTime.now();
@@ -254,6 +302,8 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
                         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(App.getLocationManager().getCurrentLatLng().latitude, App.getLocationManager().getCurrentLatLng().longitude), 12.0f));
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+
                     }
                 });
                 tvPlaceInfoExtract.setText(text);
@@ -310,6 +360,9 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                 item.setTitle("Save Excursion");
             } else if(mode == MODE_EXCURSION){
                 // SAVING EXCURSION TO DB
+                if (excursionPlaces != null || excursionPlaces.size() == 0){
+                    writeNewExcursion(excursionPlaces);
+                }
                 mode = MODE_DEFAULT;
                 item.setTitle("Create Excursion");
                 excursionPlaces = new ArrayList<>();
@@ -320,4 +373,5 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         }
 
     }
+
 }

@@ -1,14 +1,19 @@
 package com.goryn.wikiguide.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Odinn on 17.01.2018.
  */
 
-public class ExcursionPlace {
-    private String placeTitle;
-    private String thumbURL;
+public class ExcursionPlace implements Parcelable {
+    private String placeTitle = "";
+    private String thumbURL = "";
     private double lat;
     private double lon;
+
+    public ExcursionPlace(){}
 
     public ExcursionPlace(String placeTitle, String thumbURL, double lat, double lon) {
         this.placeTitle = placeTitle;
@@ -18,7 +23,7 @@ public class ExcursionPlace {
     }
 
     public String getPlaceTitle() {
-        return placeTitle;
+        return placeTitle != null ? placeTitle : null;
     }
 
     public void setPlaceTitle(String placeTitle) {
@@ -48,4 +53,39 @@ public class ExcursionPlace {
     public void setLon(double lon) {
         this.lon = lon;
     }
+
+
+
+    protected ExcursionPlace(Parcel in) {
+        placeTitle = in.readString();
+        thumbURL = in.readString();
+        lat = in.readDouble();
+        lon = in.readDouble();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(placeTitle);
+        dest.writeString(thumbURL);
+        dest.writeDouble(lat);
+        dest.writeDouble(lon);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<ExcursionPlace> CREATOR = new Parcelable.Creator<ExcursionPlace>() {
+        @Override
+        public ExcursionPlace createFromParcel(Parcel in) {
+            return new ExcursionPlace(in);
+        }
+
+        @Override
+        public ExcursionPlace[] newArray(int size) {
+            return new ExcursionPlace[size];
+        }
+    };
 }

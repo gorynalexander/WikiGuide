@@ -7,5 +7,8 @@
     <item
         android:id="@+id/action_nav_map"
         android:icon="@drawable/ic_map_black_18dp"
-        android:title="Карта"/>
+        android:title="Карта"/>    <item
+        android:id="@+id/action_excursions_list"
+        android:icon="@drawable/ic_explore_black_18dp"
+        android:title="Excursions"/>
 </menu>
