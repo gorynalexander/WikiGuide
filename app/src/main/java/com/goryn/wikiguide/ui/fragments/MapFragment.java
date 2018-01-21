@@ -84,8 +84,7 @@ import java.util.concurrent.TimeUnit;
 public class MapFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener, View.OnClickListener {
     private MapView map;
     private Polyline polylineToPlace;
-    private  List<ExcursionPlace> excursionPlaces = new ArrayList<>();
-    private int order;
+    private  List<ExcursionPlace> excursionPlacesToShow = new ArrayList<>();
 
     /*
     ** Bottom sheet items
@@ -98,13 +97,31 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
     private BottomSheetBehavior bottomSheetBehavior;
     private RelativeLayout bottomSheetHeader;
 
+
     private static int MODE_DEFAULT = 0;
-    private static int MODE_EXCURSION = 1;
-    private int mode = MODE_DEFAULT;
+    private static int MODE_EXCURSION_CREATE = 1;
+    private static int MODE_EXCURSION_VIEW = 2;
+    private static int mode = MODE_DEFAULT;
 
     private int actionId;
 
     private DatabaseReference mDatabase;
+
+    private List<ExcursionPlace> excursionPlaces = new ArrayList<>();
+
+    public static MapFragment newInstance(int map_mode, Bundle excursionPlacesToShow){
+        MapFragment mapFragment = new MapFragment();
+        mode = map_mode;
+        if (map_mode == MODE_EXCURSION_VIEW){
+//            Bundle bundle = new Bundle();
+//            bundle.putParcelableArrayList();
+            mapFragment.setArguments(excursionPlacesToShow);
+        }
+
+        return mapFragment;
+    }
+
+
 
     @Nullable
     @Override
@@ -126,6 +143,9 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         bottomSheetHeader.setOnClickListener(this);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
+
+
         return view;
     }
 
@@ -153,18 +173,27 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                     return;
                 }
                 App.getLocationManager().updateMap(googleMap);
+                if (mode == MODE_DEFAULT){
+                    App.getLocationManager().loadImages();
+                } else {
+                    Bundle bundle = getArguments();
+                    excursionPlacesToShow = bundle.getParcelableArrayList("excursionPlacesToShow");
+                    App.getLocationManager().loadExcursion(excursionPlacesToShow);
+                    App.getLocationManager().removeUserCirce();
+                }
+
 
                 googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 
                     @Override
                     public boolean onMarkerClick(Marker marker) {
 
-                        if (mode == MODE_DEFAULT) {
+                        if (mode == MODE_DEFAULT || mode == MODE_EXCURSION_VIEW) {
 
                             setMarkerInfo(marker, googleMap);
 
                             marker.showInfoWindow();
-                        } else if (mode == MODE_EXCURSION){
+                        } else if (mode == MODE_EXCURSION_CREATE){
                             addPlaceToExcursion(marker);
                         }
 
@@ -271,7 +300,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
     }
 
     private void setMarkerInfo(final Marker marker, final GoogleMap googleMap) {
-        if (marker.getTitle().equals("You! :)")) {
+        if (marker.getTitle().equals("Your position")) {
             return;
         }
 
@@ -297,8 +326,14 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                         DirectionsResult results = requestDirection(TravelMode.WALKING,
                                 App.getLocationManager().getCurrentUserLatLng(),
                                 placePos);
-                        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
-                        polylineToPlace = googleMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+                        try {
+                            List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+                            polylineToPlace = googleMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+                        } catch (ArrayIndexOutOfBoundsException e){
+                            Log.e("Error_directions_api", e.getMessage());
+                            Toast.makeText(getContext(), "Can't create the path", Toast.LENGTH_SHORT).show();
+                        }
+
 
                         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(App.getLocationManager().getCurrentLatLng().latitude, App.getLocationManager().getCurrentLatLng().longitude), 12.0f));
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -356,9 +391,9 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         if (item.getItemId() == actionId) {
             if (mode == MODE_DEFAULT) {
                 Toast.makeText(getContext(), "Choose places in order", Toast.LENGTH_LONG).show();
-                mode = MODE_EXCURSION;
+                mode = MODE_EXCURSION_CREATE;
                 item.setTitle("Save Excursion");
-            } else if(mode == MODE_EXCURSION){
+            } else if(mode == MODE_EXCURSION_CREATE){
                 // SAVING EXCURSION TO DB
                 if (excursionPlaces != null || excursionPlaces.size() == 0){
                     writeNewExcursion(excursionPlaces);

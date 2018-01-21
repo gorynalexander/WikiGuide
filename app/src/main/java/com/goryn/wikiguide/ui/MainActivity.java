@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                         fragment = placesFragment;
                         break;
                     case R.id.action_nav_map:
-                        fragment = new MapFragment();
+                        fragment = MapFragment.newInstance(0, null);
                         break;
                     case R.id.action_excursions_list:
                         fragment = new ExcursionsFragment();

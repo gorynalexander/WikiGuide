@@ -1,5 +1,7 @@
 package com.goryn.wikiguide.model;
 
+import android.support.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -14,6 +16,7 @@ public class Query {
 
     @SerializedName("pages")
     @Expose
+    @Nullable
     private List<Page> pages = null;
 
     public List<Page> getPages() {

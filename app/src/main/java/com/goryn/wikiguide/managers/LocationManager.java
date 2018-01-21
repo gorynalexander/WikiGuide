@@ -28,6 +28,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
+import com.goryn.wikiguide.model.ExcursionPlace;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.Query;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -94,12 +95,35 @@ public class LocationManager implements LocationListener {
                 .center(latLng)
                 .radius(circleRadius)
                 .strokeColor(Color.BLUE));
-        loadImages();
+
         //setMarkers(App.getQuery());
 
     }
 
+    public void loadExcursion(List<ExcursionPlace> excursionPlaces){
+
+        final ImageLoader imageLoader = ImageLoader.getInstance();
+        if (markers != null) {
+            for (Marker marker : markers) {
+                marker.remove();
+            }
+        }
+
+        for (final ExcursionPlace place : excursionPlaces) {
+            imageLoader.loadImage(place.getThumbURL(), new SimpleImageLoadingListener() {
+                @Override
+                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+
+                    Marker marker = googleMap.addMarker(createMarkerOptions(place, createBitmapFromView(loadedImage)));
+                    markers.add(marker);
+                }
+            });
+        }
+    }
+
     public void loadImages() {
+
+
         List<Page> pages = App.getQuery().getPages();
         final ImageLoader imageLoader = ImageLoader.getInstance();
 
@@ -172,6 +196,10 @@ public class LocationManager implements LocationListener {
         userCircle.setCenter(latLng);
     }
 
+    public void removeUserCirce(){
+        userCircle.remove();
+    }
+
     public void removeUserMarker() {
         userMarker.remove();
         userCircle.remove();
@@ -184,30 +212,19 @@ public class LocationManager implements LocationListener {
         }
     }
 
-//
-//    public void setMarkers(Query result) {
-//        if (markers != null) {
-//            for (Marker marker : markers) {
-//                marker.remove();
-//                Log.i("TAAAAG", marker.getTitle());
-//            }
-//        }
-//        for (Page page : result.getPages()) {
-//            Log.i("MAP_DEBUGING", "123");
-//            if (page.getCoordinates() != null) {
-//                Log.i("MAP_DEBUGING", page.getTitle());
-//                Marker marker = googleMap.addMarker(createMarkerOptions(page));
-//                markers.add(marker);
-//            }
-//        }
-//
-//    }
 
 
     public MarkerOptions createMarkerOptions(Page page, Bitmap bitmap) {
         return new MarkerOptions()
                 .position(new LatLng(page.getCoordinates().get(0).getLat(), page.getCoordinates().get(0).getLon()))
                 .title(page.getTitle())
+                .icon(BitmapDescriptorFactory.fromBitmap(bitmap));
+    }
+
+    public MarkerOptions createMarkerOptions(ExcursionPlace place, Bitmap bitmap) {
+        return new MarkerOptions()
+                .position(new LatLng(place.getLat(), place.getLon()))
+                .title(place.getPlaceTitle())
                 .icon(BitmapDescriptorFactory.fromBitmap(bitmap));
     }
 

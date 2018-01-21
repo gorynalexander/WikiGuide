@@ -58,7 +58,11 @@ public class PlacesFragment extends Fragment {
 
 
     public void notifyDataFromActivity() {
-        rvPlacesAdapter.setPagesList(App.getQuery().getPages());
+        if (App.getQuery() != null){
+            if (App.getQuery().getPages() != null)
+                rvPlacesAdapter.setPagesList(App.getQuery().getPages());
+        }
+
     }
 
     public void isOnline() {
