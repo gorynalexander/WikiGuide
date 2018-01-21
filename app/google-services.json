@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "413528961204",
+    "firebase_url": "https://wikiguide-1500526607880.firebaseio.com",
+    "project_id": "wikiguide-1500526607880",
+    "storage_bucket": "wikiguide-1500526607880.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:413528961204:android:c364ff329d54f236",
+        "android_client_info": {
+          "package_name": "com.goryn.wikiguide"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "413528961204-8omsjpel6kbuif6lqpe3bkcjalt6encd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.goryn.wikiguide",
+            "certificate_hash": "63326d725ec86c9bd8861568c275a57aa74fd675"
+          }
+        },
+        {
+          "client_id": "413528961204-39f62f16i89mte8i83caas0645kjdfll.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDr-GbQUAtURAvu9KswGV5RxSBn5U4-Au8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "413528961204-39f62f16i89mte8i83caas0645kjdfll.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -48,6 +48,7 @@ import com.goryn.wikiguide.App;
 import com.goryn.wikiguide.R;
 import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.QueryResult;
+import com.goryn.wikiguide.ui.fragments.ExcursionsFragment;
 import com.goryn.wikiguide.ui.fragments.MapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
 import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
@@ -138,31 +139,29 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        final ImageView imageView =  new ImageView(App.getContext());
+        final ImageView imageView = new ImageView(App.getContext());
 //                Glide.with(App.getContext())
 //                .load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg")
 //                .into(imageView);
 
         Picasso.Builder pBuilder = new Picasso.Builder(this);
-        pBuilder.listener(new Picasso.Listener()
-        {
+        pBuilder.listener(new Picasso.Listener() {
             @Override
-            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception)
-            {
+            public void onImageLoadFailed(Picasso picasso, Uri uri, Exception exception) {
                 Log.e("ERROR_PICASSO", exception.getMessage());
                 exception.printStackTrace();
             }
         });
         pBuilder.build().load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg").into(imageView);
-                Picasso.with(imageView.getContext()).load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg").into(imageView);
+        Picasso.with(imageView.getContext()).load("https://upload.wikimedia.org/wikipedia/commons/2/28/Luzanivka_Hydropark_01.jpg").into(imageView);
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this)
                 .build();
-         ImageLoader.getInstance().init(config); // Get singleton instance
+        ImageLoader.getInstance().init(config); // Get singleton instance
 
 
         builder.setTitle("DSDS");
         builder.setView(imageView);
-       // builder.show();
+        // builder.show();
 
     }
 
@@ -229,13 +228,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
-                item.setChecked(true);
                 switch (id) {
                     case R.id.action_nav_main:
                         fragment = placesFragment;
                         break;
                     case R.id.action_nav_map:
                         fragment = new MapFragment();
+                        break;
+                    case R.id.action_excursions_list:
+                        fragment = new ExcursionsFragment();
                         break;
                 }
 
@@ -281,9 +282,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
                 App.setQuery(response.body().getQuery());
-                Log.i("DATA", response.toString());
+
                 placesFragment.notifyDataFromActivity();
-                Log.i("TESTING_URL", response.body().getQuery().getPages().get(0).getThumbUrl());
+
                 // TODO: UPDATE MAP IF IT'S ALIVE
 
             }
@@ -325,6 +326,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onStop() {
         super.onStop();
         //unregisterReceiver(broadcastReceiver);
+        //App.getLocationManager().stopLocationUpdates();
     }
 
     @Override
@@ -347,6 +349,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
+
 
         }
         return super.onOptionsItemSelected(item);
