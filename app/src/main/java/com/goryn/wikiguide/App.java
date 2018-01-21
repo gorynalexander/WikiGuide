@@ -34,8 +34,10 @@ public class App extends Application {
         context = getApplicationContext();
 
 
-        googleApiHelper = new GoogleApiHelper();
-        locationManager = new LocationManager(context);
+            googleApiHelper = new GoogleApiHelper();
+            locationManager = new LocationManager(context);
+
+
 
         query = new Query();
         wQuery = new Query();
@@ -50,6 +52,10 @@ public class App extends Application {
 
     public static GoogleApiClient getGoogleApiClient() {
         return getGoogleApiHelper().getGoogleApiClient();
+    }
+
+    public static Context getContext(){
+        return getInstance().context;
     }
 
     public static GoogleApiHelper getGoogleApiHelper() {

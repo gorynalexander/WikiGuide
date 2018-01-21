@@ -23,4 +23,15 @@ public class Query {
         return pages;
     }
 
+    public String getImageURLByTitle(String title){
+        String url = "";
+        for (Page page : pages){
+            if (page.getTitle().equals(title)){
+                url = page.getThumbUrl();
+                return url;
+            }
+        }
+        return "";
+    }
+
 }

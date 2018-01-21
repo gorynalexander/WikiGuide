@@ -7,9 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/**
- * Created by Odinn on 10.08.2017.
- */
+import javax.xml.transform.Source;
 
 public class Page {
     @SerializedName("pageid")
@@ -32,6 +30,7 @@ public class Page {
     @Expose
     private List<Coordinate> coordinates;
 
+    @Nullable
     @SerializedName("thumbnail")
     @Expose
     private Thumbnail thumbnail;
@@ -49,8 +48,17 @@ public class Page {
     @Expose
     private String extract;
 
+    public Page(String title, String thumbUrl, float lat, float lon){
+        this.title = title;
+        //thumbnail.source = thumbUrl;
+        coordinates.get(0).setLat(lat);
+        coordinates.get(0).setLon(lon);
+    }
+
+
+    @Nullable
     public String getFullImage(){
-        return original.getSource();
+        return original != null ? getOriginal().getSource() : null;
     }
     public String getExtract() {
         return extract;
@@ -68,7 +76,15 @@ public class Page {
         return ns;
     }
 
+    @Nullable
+    public Thumbnail getThumbnail(){
+        return thumbnail;
+    }
 
+    @Nullable
+    public Thumbnail getOriginal(){
+        return original;
+    }
     public String getTitle() {
         return title;
     }
@@ -87,7 +103,8 @@ public class Page {
 
     @Nullable
     public String getThumbUrl() {
-        return thumbnail.getSource();
+
+        return thumbnail != null ? getThumbnail().getSource() : null;
     }
 
 
@@ -127,8 +144,9 @@ public class Page {
         @Expose
         public int height;
 
+        @Nullable
         public String getSource() {
-            return source;
+            return  source == null ? null : source;
         }
 
         public int getWidth() {
