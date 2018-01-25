@@ -9,6 +9,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -51,6 +52,7 @@ import com.goryn.wikiguide.model.QueryResult;
 import com.goryn.wikiguide.ui.fragments.ExcursionsFragment;
 import com.goryn.wikiguide.ui.fragments.MapFragment;
 import com.goryn.wikiguide.ui.fragments.PlacesFragment;
+import com.goryn.wikiguide.utils.DrawerLocker;
 import com.goryn.wikiguide.utils.NetworkBroadcastReceiver;
 import com.goryn.wikiguide.utils.WikiQueryService;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -67,27 +69,37 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        SharedPreferences.OnSharedPreferenceChangeListener,
+        DrawerLocker{
 
-    FragmentManager fragmentManager;
-    Fragment fragment;
-    private DrawerLayout drawer;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private Toolbar toolbar;
-    private NavigationView navigationView;
+    private FragmentManager         fragmentManager;
+    private Fragment                fragment;
+    private DrawerLayout            drawer;
+    private ActionBarDrawerToggle   mDrawerToggle;
+    private Toolbar                 toolbar;
+    private NavigationView          navigationView;
 
     /*  Location   */
-    private GoogleApiClient googleApiClient;
-    private LatLng currentLatLng;
-
+    private GoogleApiClient         googleApiClient;
+    private LatLng                  currentLatLng;
 
     /* Fragments */
-    private PlacesFragment placesFragment;
+    private PlacesFragment          placesFragment;
 
     private NetworkBroadcastReceiver broadcastReceiver;
 
     private int placesCount;
     private int radius;
+
+    /* onBackPressed */
+    private boolean isDoublePressedToExit = false;
+    private Handler mHandler = new Handler();
+    private final Runnable mRunnable = new Runnable() {
+        @Override
+        public void run() {
+            isDoublePressedToExit = false;
+        }
+    };
 
 
     @Override
@@ -274,9 +286,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         WikiQueryService service = retrofit.create(WikiQueryService.class);
 
         String geo = String.format(Locale.ROOT, "%f|%f", latLng.latitude, latLng.longitude);
-        Log.i("NEW REQUEST", "" + placesCount);
-        Call<QueryResult> call = service.request(geo, radius, 144, placesCount);
 
+        Call<QueryResult> call = service.request(geo, radius, 144, placesCount);
 
         call.enqueue(new retrofit2.Callback<QueryResult>() {
             @Override
@@ -368,6 +379,36 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             App.getLocationManager().setUserCircleRadius(radius);
             makeRequestToWiki(App.getLocationManager().getCurrentLatLng());
         }
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+//        if (isDoublePressedToExit){
+//            super.onBackPressed();
+//            return;
+//        }
+//
+//        isDoublePressedToExit = true;
+//        Toast.makeText(this, "Click back again to exit", Toast.LENGTH_SHORT).show();
+//        mHandler.postDelayed(mRunnable, 3000);
+    }
+
+    @Override
+    public void setDrawerEnabled(boolean enabled) {
+        int lockMode = enabled ? DrawerLayout.LOCK_MODE_UNLOCKED : DrawerLayout.LOCK_MODE_LOCKED_CLOSED;
+        drawer.setDrawerLockMode(lockMode);
+        mDrawerToggle.setDrawerIndicatorEnabled(enabled);
+        if (!enabled){
+            mDrawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        }
+        mDrawerToggle.syncState();
     }
 }
 

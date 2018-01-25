@@ -2,16 +2,18 @@ package com.goryn.wikiguide.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 /**
  * Created by Odinn on 17.01.2018.
  */
 
-public class ExcursionPlace implements Parcelable {
+public class ExcursionPlace implements Parcelable, Comparable {
     private String placeTitle = "";
     private String thumbURL = "";
     private double lat;
     private double lon;
+    private double distance;
 
     public ExcursionPlace(){}
 
@@ -21,6 +23,8 @@ public class ExcursionPlace implements Parcelable {
         this.lat = lat;
         this.lon = lon;
     }
+
+
 
     public String getPlaceTitle() {
         return placeTitle != null ? placeTitle : null;
@@ -54,7 +58,9 @@ public class ExcursionPlace implements Parcelable {
         this.lon = lon;
     }
 
-
+    public double getDistance() {
+        return distance;
+    }
 
     protected ExcursionPlace(Parcel in) {
         placeTitle = in.readString();
@@ -88,4 +94,39 @@ public class ExcursionPlace implements Parcelable {
             return new ExcursionPlace[size];
         }
     };
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ExcursionPlace that = (ExcursionPlace) o;
+
+        if (Double.compare(that.lat, lat) != 0) return false;
+        if (Double.compare(that.lon, lon) != 0) return false;
+        if (!placeTitle.equals(that.placeTitle)) return false;
+        return thumbURL != null ? thumbURL.equals(that.thumbURL) : that.thumbURL == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = placeTitle.hashCode();
+        result = 31 * result + (thumbURL != null ? thumbURL.hashCode() : 0);
+        temp = Double.doubleToLongBits(lat);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(lon);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+
+    @Override
+    public int compareTo(@NonNull Object o) {
+        double distance = ((ExcursionPlace) o).getDistance();
+        return (int) (this.distance - distance);
+    }
 }

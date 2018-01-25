@@ -41,17 +41,17 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class LocationManager implements LocationListener {
-    private Location previuousLocation, currentLocation;
-    private Context context;
+    private Location        currentLocation;
+    private Context         context;
 
-    private GoogleMap googleMap;
+    private GoogleMap       googleMap;
     private LocationRequest locationRequest;
 
-    private Marker userMarker;
-    private Circle userCircle;
-    private int circleRadius = 5000;
+    private Marker          userMarker;
+    private Circle          userCircle;
+    private int             circleRadius = 5000;
 
-    private List<Marker> markers = new ArrayList<>();
+    private List<Marker>    markers = new ArrayList<>();
 
     public LocationManager(Context context) {
         this.context = context;
@@ -122,7 +122,6 @@ public class LocationManager implements LocationListener {
     }
 
     public void loadImages() {
-
 
         List<Page> pages = App.getQuery().getPages();
         final ImageLoader imageLoader = ImageLoader.getInstance();

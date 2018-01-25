@@ -62,9 +62,11 @@ public class ExcursionPlacesAdapter extends RecyclerView.Adapter<ExcursionPlaces
             public void onClick(View v) {
                 FragmentManager fragmentManager = ((AppCompatActivity) context).getSupportFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
+
                 Bundle bundle = new Bundle();
                 bundle.putParcelableArrayList("excursionPlacesToShow", (ArrayList<? extends Parcelable>) excursionPlaces);
                 transaction.replace(R.id.container, MapFragment.newInstance(2, bundle));
+                transaction.addToBackStack(null);
                 transaction.commit();
             }
         });

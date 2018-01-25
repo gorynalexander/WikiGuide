@@ -23,12 +23,13 @@ import com.goryn.wikiguide.model.Page;
 import com.goryn.wikiguide.model.QueryResult;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.ViewHolder> {
 
-    List<Page> pagesList;
+    private List<Page> pagesList = new ArrayList<>();
 
 
     public PlacesAdapter(List<Page> pagesList) {

@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -82,26 +83,31 @@ import java.util.concurrent.TimeUnit;
 
 
 public class MapFragment extends Fragment implements SharedPreferences.OnSharedPreferenceChangeListener, View.OnClickListener {
-    private MapView map;
-    private Polyline polylineToPlace;
-    private  List<ExcursionPlace> excursionPlacesToShow = new ArrayList<>();
+    private MapView                 map;
+    private Polyline                polylineToPlace;
+    private List<ExcursionPlace>    excursionPlacesToShow = new ArrayList<>();
 
     /*
     ** Bottom sheet items
      */
-    private TextView tvPlaceInfoTitle;
-    private TextView tvPlaceInfoExtract;
-    private ImageView ivPlaceInfoImage;
-    private Button btnNavigation;
-    private LinearLayout bottomSheet;
+    private TextView            tvPlaceInfoTitle;
+    private TextView            tvPlaceInfoExtract;
+    private ImageView           ivPlaceInfoImage;
+    private Button              btnNavigation;
+    private LinearLayout        bottomSheet;
     private BottomSheetBehavior bottomSheetBehavior;
-    private RelativeLayout bottomSheetHeader;
+    private RelativeLayout      bottomSheetHeader;
 
-
-    private static int MODE_DEFAULT = 0;
-    private static int MODE_EXCURSION_CREATE = 1;
-    private static int MODE_EXCURSION_VIEW = 2;
-    private static int mode = MODE_DEFAULT;
+    /*
+    * Map has different modes
+    * 1. Default view mode
+    * 2. Mode for excursion creation
+    * 3. Mode for excursion view
+     */
+    private static int MODE_DEFAULT           = 0;
+    private static int MODE_EXCURSION_CREATE  = 1;
+    private static int MODE_EXCURSION_VIEW    = 2;
+    private static int mode                   = MODE_DEFAULT;
 
     private int actionId;
 
@@ -109,10 +115,10 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
     private List<ExcursionPlace> excursionPlaces = new ArrayList<>();
 
-    public static MapFragment newInstance(int map_mode, Bundle excursionPlacesToShow){
+    public static MapFragment newInstance(int map_mode, Bundle excursionPlacesToShow) {
         MapFragment mapFragment = new MapFragment();
         mode = map_mode;
-        if (map_mode == MODE_EXCURSION_VIEW){
+        if (map_mode == MODE_EXCURSION_VIEW) {
 //            Bundle bundle = new Bundle();
 //            bundle.putParcelableArrayList();
             mapFragment.setArguments(excursionPlacesToShow);
@@ -122,7 +128,6 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
     }
 
 
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -130,13 +135,13 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         map = (MapView) view.findViewById(R.id.mapView);
         map.onCreate(savedInstanceState);
 
-        tvPlaceInfoTitle = (TextView) view.findViewById(R.id.tv_dialog_place_title);
-        tvPlaceInfoExtract = (TextView) view.findViewById(R.id.tv_dialog_place_extract);
-        ivPlaceInfoImage = (ImageView) view.findViewById(R.id.iv_dialog_place_image);
-        btnNavigation = (Button) view.findViewById(R.id.btn_dialog_navigate);
+        tvPlaceInfoTitle    =   (TextView) view.findViewById(R.id.tv_dialog_place_title);
+        tvPlaceInfoExtract  =   (TextView) view.findViewById(R.id.tv_dialog_place_extract);
+        ivPlaceInfoImage    =   (ImageView) view.findViewById(R.id.iv_dialog_place_image);
+        btnNavigation       =   (Button) view.findViewById(R.id.btn_dialog_navigate);
+        bottomSheet         =   (LinearLayout) view.findViewById(R.id.bottom_sheet_place_details);
 
-        bottomSheet = (LinearLayout) view.findViewById(R.id.bottom_sheet_place_details);
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetBehavior =   BottomSheetBehavior.from(bottomSheet);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         bottomSheetHeader = (RelativeLayout) view.findViewById(R.id.bottom_sheet_header);
@@ -144,6 +149,9 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
+        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("City explorer");
+        }
 
 
         return view;
@@ -173,15 +181,16 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                     return;
                 }
                 App.getLocationManager().updateMap(googleMap);
-                if (mode == MODE_DEFAULT){
+                if (mode == MODE_DEFAULT) {
                     App.getLocationManager().loadImages();
                 } else {
                     Bundle bundle = getArguments();
                     excursionPlacesToShow = bundle.getParcelableArrayList("excursionPlacesToShow");
                     App.getLocationManager().loadExcursion(excursionPlacesToShow);
                     App.getLocationManager().removeUserCirce();
-                }
+                    createExcursionRoute(excursionPlacesToShow, googleMap);
 
+                }
 
                 googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
 
@@ -191,10 +200,12 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                         if (mode == MODE_DEFAULT || mode == MODE_EXCURSION_VIEW) {
 
                             setMarkerInfo(marker, googleMap);
-
+                            marker.setSnippet("");
                             marker.showInfoWindow();
-                        } else if (mode == MODE_EXCURSION_CREATE){
+                        } else if (mode == MODE_EXCURSION_CREATE) {
+
                             addPlaceToExcursion(marker);
+
                         }
 
                         return true;
@@ -207,13 +218,25 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
+
     private void addPlaceToExcursion(Marker marker) {
         String url = App.getQuery().getImageURLByTitle(marker.getTitle());
-        excursionPlaces.add(new ExcursionPlace(marker.getTitle(), url,   marker.getPosition().latitude,  marker.getPosition().longitude));
-        Toast.makeText(getContext(), "Place '"+ marker.getTitle() + "' was added to the excursion list as #"+excursionPlaces.size(), Toast.LENGTH_LONG).show();
+        ExcursionPlace excursionPlace = new ExcursionPlace(marker.getTitle(), url, marker.getPosition().latitude, marker.getPosition().longitude);
+        if (excursionPlaces.contains(excursionPlace)) {
+            excursionPlaces.remove(excursionPlace);
+            marker.setSnippet("Removed from excursion list");
+            marker.showInfoWindow();
+
+        } else {
+            excursionPlaces.add(excursionPlace);
+            Toast.makeText(getContext(), "Place '" + marker.getTitle() + "' was added to the excursion list as #" + excursionPlaces.size(), Toast.LENGTH_LONG).show();
+            marker.setSnippet("Added as " + (excursionPlaces.size() + " place to visit"));
+            marker.showInfoWindow();
+        }
+
     }
 
-    private void writeNewExcursion(final List<ExcursionPlace> excursions){
+    private void writeNewExcursion(final List<ExcursionPlace> excursions) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Excursion");
         builder.setMessage("Please, type the title of this excursion");
@@ -232,10 +255,10 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                     String title = input.getText().toString();
                     Excursion excursion = new Excursion(title, excursions);
 
-                    String key  = mDatabase.child("excursions").push().getKey();
+                    String key = mDatabase.child("excursions").push().getKey();
                     Map<String, Object> excValues = excursion.toMap();
                     Map<String, Object> childUpdates = new HashMap<>();
-                    childUpdates.put("/excursions/"+ key, excValues);
+                    childUpdates.put("/excursions/" + key, excValues);
                     mDatabase.updateChildren(childUpdates);
 
                     dialog.dismiss();
@@ -321,19 +344,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                     public void onClick(View v) {
                         if (polylineToPlace != null) polylineToPlace.remove();
 
-                        com.google.maps.model.LatLng placePos =
-                                new com.google.maps.model.LatLng(marker.getPosition().latitude, marker.getPosition().longitude);
-                        DirectionsResult results = requestDirection(TravelMode.WALKING,
-                                App.getLocationManager().getCurrentUserLatLng(),
-                                placePos);
-                        try {
-                            List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
-                            polylineToPlace = googleMap.addPolyline(new PolylineOptions().addAll(decodedPath));
-                        } catch (ArrayIndexOutOfBoundsException e){
-                            Log.e("Error_directions_api", e.getMessage());
-                            Toast.makeText(getContext(), "Can't create the path", Toast.LENGTH_SHORT).show();
-                        }
-
+                        createPolylineOnMap(googleMap, marker.getPosition().latitude, marker.getPosition().longitude);
 
                         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(App.getLocationManager().getCurrentLatLng().latitude, App.getLocationManager().getCurrentLatLng().longitude), 12.0f));
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -342,7 +353,6 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                     }
                 });
                 tvPlaceInfoExtract.setText(text);
-                //TODO: пофиксить картинку
                 Picasso.with(getContext()).load(result.getQuery().getPages().get(0).getThumbUrl()).into(ivPlaceInfoImage);
 
                 Glide.with(getContext())
@@ -361,6 +371,59 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
             }
         });
         queue.add(stringRequest);
+    }
+
+    private void createPolylineOnMap(GoogleMap googleMap, double lat, double lon) {
+        if (polylineToPlace != null) polylineToPlace.remove();
+
+        com.google.maps.model.LatLng placePos =
+                new com.google.maps.model.LatLng(lat, lon);
+        DirectionsResult results = requestDirection(TravelMode.WALKING,
+                App.getLocationManager().getCurrentUserLatLng(),
+                placePos);
+        //results.routes[0].legs[0].distance
+        try {
+            List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+            polylineToPlace = googleMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Log.e("Error_directions_api", e.getMessage());
+            Toast.makeText(getContext(), "Can't create the path", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+    private void createExcursionRoute(List<ExcursionPlace> places, GoogleMap googleMap) {
+//        for (Polyline polyline : polylines) {
+//            if (polyline != null) polyline.remove();
+//        }
+        for (int i = 0; i < places.size(); i++){
+
+            com.google.maps.model.LatLng destLatLng;
+
+
+            if (i == 0) {
+                destLatLng = App.getLocationManager().getCurrentUserLatLng();
+            } else {
+                destLatLng = new com.google.maps.model.LatLng(places.get(i-1).getLat(), places.get(i-1).getLon());
+            }
+            com.google.maps.model.LatLng placePos =
+                    new com.google.maps.model.LatLng(places.get(i).getLat(), places.get(i).getLon());
+            DirectionsResult results = requestDirection(TravelMode.WALKING,destLatLng
+                    ,
+                    placePos);
+            //results.routes[0].legs[0].distance
+            try {
+                List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+                polylineToPlace = googleMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+            } catch (ArrayIndexOutOfBoundsException e) {
+                Log.e("Error_directions_api", e.getMessage());
+                Toast.makeText(getContext(), "Can't create the path", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+
+
     }
 
     @Override
@@ -393,9 +456,9 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                 Toast.makeText(getContext(), "Choose places in order", Toast.LENGTH_LONG).show();
                 mode = MODE_EXCURSION_CREATE;
                 item.setTitle("Save Excursion");
-            } else if(mode == MODE_EXCURSION_CREATE){
+            } else if (mode == MODE_EXCURSION_CREATE) {
                 // SAVING EXCURSION TO DB
-                if (excursionPlaces != null || excursionPlaces.size() == 0){
+                if (excursionPlaces != null || excursionPlaces.size() == 0) {
                     writeNewExcursion(excursionPlaces);
                 }
                 mode = MODE_DEFAULT;

@@ -9,6 +9,7 @@ import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -27,16 +28,21 @@ import java.util.List;
 
 public class PlacesFragment extends Fragment {
 
-    RecyclerView rvPlaces;
-    PlacesAdapter rvPlacesAdapter;
-    List<Page> pagesList;
+    RecyclerView    rvPlaces;
+    PlacesAdapter   rvPlacesAdapter;
+    List<Page>      pagesList;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_places_list, container, false);
+
+        if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("City Explorer");
+        }
+
         rvPlaces = (RecyclerView) view.findViewById(R.id.rv_places_list);
-        Toast.makeText(getContext(), "OnCreateView", Toast.LENGTH_SHORT).show();
+
         if (App.getQuery().getPages() != null) {
             pagesList = App.getQuery().getPages();
             //Toast.makeText(getContext(),""+ App.getQuery().getPages().size(), Toast.LENGTH_SHORT).show();
@@ -46,7 +52,7 @@ public class PlacesFragment extends Fragment {
             rvPlaces.setAdapter(rvPlacesAdapter);
 
         } else {
-            Toast.makeText(getContext(), "NULL", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Unfortunately, there are no places in your area that we can display", Toast.LENGTH_LONG).show();
             // TODO SHOW MESSAGE THAT NO PLACES DETECTED OR BAD CONNECTION
         }
 
