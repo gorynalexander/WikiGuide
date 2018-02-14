@@ -34,8 +34,8 @@ public class App extends Application {
         context = getApplicationContext();
 
 
-            googleApiHelper = new GoogleApiHelper();
-            locationManager = new LocationManager(context);
+        googleApiHelper = new GoogleApiHelper();
+        locationManager = new LocationManager(context);
 
 
 

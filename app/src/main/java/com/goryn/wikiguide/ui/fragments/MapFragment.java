@@ -123,6 +123,11 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
 //            bundle.putParcelableArrayList();
             mapFragment.setArguments(excursionPlacesToShow);
         }
+        if (map_mode == MODE_DEFAULT){
+            if (excursionPlacesToShow != null){
+                mapFragment.setArguments(excursionPlacesToShow);
+            }
+        }
 
         return mapFragment;
     }
@@ -150,7 +155,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         if (((AppCompatActivity) getActivity()).getSupportActionBar() != null) {
-            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("City explorer");
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("City Explorer");
         }
 
 
@@ -182,7 +187,24 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                 }
                 App.getLocationManager().updateMap(googleMap);
                 if (mode == MODE_DEFAULT) {
+
                     App.getLocationManager().loadImages();
+                    Log.i("NOTNULL", "NOT NULL");
+                    Bundle bundle = getArguments();
+                    if (bundle != null){
+
+                        Page page = (Page) bundle.getSerializable("page");
+                        LatLng pagePos = new LatLng(page.getCoordinates().get(0).getLat(), page.getCoordinates().get(0).getLon());
+                        createPolylineOnMap(googleMap, pagePos.latitude, pagePos.longitude);
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(pagePos.latitude, pagePos.longitude), 12.0f));
+                    } else {
+                        Log.i("NOTNULL", "NULL");
+                    }
+
+
+
+
+
                 } else {
                     Bundle bundle = getArguments();
                     excursionPlacesToShow = bundle.getParcelableArrayList("excursionPlacesToShow");
@@ -347,6 +369,7 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                         createPolylineOnMap(googleMap, marker.getPosition().latitude, marker.getPosition().longitude);
 
                         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(App.getLocationManager().getCurrentLatLng().latitude, App.getLocationManager().getCurrentLatLng().longitude), 12.0f));
+
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
 
@@ -360,7 +383,10 @@ public class MapFragment extends Fragment implements SharedPreferences.OnSharedP
                         .into(ivPlaceInfoImage);
 
                 tvPlaceInfoTitle.setText(marker.getTitle());
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+               // bottomSheetBehavior.setPeekHeight(500);
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+//                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
 
 
             }

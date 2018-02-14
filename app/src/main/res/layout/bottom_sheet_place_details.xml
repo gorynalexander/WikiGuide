@@ -29,6 +29,8 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginTop="10dp"
+                android:layout_toLeftOf="@+id/btn_dialog_navigate"
+                android:layout_toStartOf="@+id/btn_dialog_navigate"
                 android:textColor="@android:color/black"
                 android:textSize="18sp" />
 

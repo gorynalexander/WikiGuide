@@ -132,6 +132,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 // result of the request.
             }
 
+        } else {
+            // implement App methods
         }
 
 
@@ -384,15 +386,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-//        if (isDoublePressedToExit){
-//            super.onBackPressed();
-//            return;
-//        }
-//
-//        isDoublePressedToExit = true;
-//        Toast.makeText(this, "Click back again to exit", Toast.LENGTH_SHORT).show();
-//        mHandler.postDelayed(mRunnable, 3000);
+
+        if (fragmentManager.getBackStackEntryCount() == 0) {
+            if (isDoublePressedToExit) {
+                super.onBackPressed();
+                return;
+            }
+
+            isDoublePressedToExit = true;
+            Toast.makeText(this, "Click back again to exit", Toast.LENGTH_SHORT).show();
+            mHandler.postDelayed(mRunnable, 3000);
+        } else {
+            super.onBackPressed();
+        }
+
     }
 
     @Override

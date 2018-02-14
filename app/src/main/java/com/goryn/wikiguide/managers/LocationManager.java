@@ -123,6 +123,8 @@ public class LocationManager implements LocationListener {
 
     public void loadImages() {
 
+        if (App.getQuery() == null) return;
+
         List<Page> pages = App.getQuery().getPages();
         final ImageLoader imageLoader = ImageLoader.getInstance();
 

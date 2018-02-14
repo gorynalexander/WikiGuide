@@ -42,18 +42,20 @@ public class PlacesFragment extends Fragment {
         }
 
         rvPlaces = (RecyclerView) view.findViewById(R.id.rv_places_list);
+        if (App.getQuery() != null){
+            if (App.getQuery().getPages() != null) {
+                pagesList = App.getQuery().getPages();
+                //Toast.makeText(getContext(),""+ App.getQuery().getPages().size(), Toast.LENGTH_SHORT).show();
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
+                rvPlaces.setLayoutManager(layoutManager);
+                rvPlacesAdapter = new PlacesAdapter( getContext(),pagesList);
+                rvPlaces.setAdapter(rvPlacesAdapter);
 
-        if (App.getQuery().getPages() != null) {
-            pagesList = App.getQuery().getPages();
-            //Toast.makeText(getContext(),""+ App.getQuery().getPages().size(), Toast.LENGTH_SHORT).show();
-            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(view.getContext());
-            rvPlaces.setLayoutManager(layoutManager);
-            rvPlacesAdapter = new PlacesAdapter(pagesList);
-            rvPlaces.setAdapter(rvPlacesAdapter);
+            } else {
+                Toast.makeText(getContext(), "Unfortunately, there are no places in your area that we can display", Toast.LENGTH_LONG).show();
+                // TODO SHOW MESSAGE THAT NO PLACES DETECTED OR BAD CONNECTION
+            }
 
-        } else {
-            Toast.makeText(getContext(), "Unfortunately, there are no places in your area that we can display", Toast.LENGTH_LONG).show();
-            // TODO SHOW MESSAGE THAT NO PLACES DETECTED OR BAD CONNECTION
         }
 
         if (!App.getGoogleApiClient().isConnected()) {

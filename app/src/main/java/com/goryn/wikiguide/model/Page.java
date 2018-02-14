@@ -1,15 +1,17 @@
 package com.goryn.wikiguide.model;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.xml.transform.Source;
 
-public class Page {
+public class Page implements Comparable<Page>, Serializable{
     @SerializedName("pageid")
     @Expose
     private int pageid;
@@ -47,6 +49,10 @@ public class Page {
     @SerializedName("extract")
     @Expose
     private String extract;
+
+
+
+    private double distanceToUser;
 
     public Page(String title, String thumbUrl, float lat, float lon){
         this.title = title;
@@ -117,10 +123,26 @@ public class Page {
     }
 
 
+    public double getDistanceToUser() {
+        return distanceToUser;
+    }
+
+    public void setDistanceToUser(double distanceToUser) {
+        this.distanceToUser = distanceToUser;
+    }
 
     @Nullable
     public String getDescription() {
         return terms != null && terms.description() != null ? terms.description().get(0) : null;
+    }
+
+    @Override
+    public int compareTo(@NonNull Page o) {
+        double distance = o.getDistanceToUser();
+        if (distance == 0){
+            return -1;
+        }
+        return (int) (this.distanceToUser - distance);
     }
 
     static class Terms {
