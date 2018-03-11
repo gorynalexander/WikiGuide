@@ -48,6 +48,7 @@ public class Excursion implements Comparable{
         HashMap<String, Object> result = new HashMap<>();
         result.put("title", title);
         result.put("excursionPlaces", excursionPlaces);
+        result.put("addedByUser", new User());
         return result;
     }
 

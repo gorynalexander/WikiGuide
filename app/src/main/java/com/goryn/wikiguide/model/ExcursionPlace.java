@@ -14,9 +14,17 @@ public class ExcursionPlace implements Parcelable, Comparable {
     private double lat;
     private double lon;
     private double distance;
+    private String description;
 
     public ExcursionPlace(){}
 
+    public ExcursionPlace(String placeTitle, String thumbURL, double lat, double lon, String description) {
+        this.placeTitle = placeTitle;
+        this.thumbURL = thumbURL;
+        this.lat = lat;
+        this.lon = lon;
+        this.description = description;
+    }
     public ExcursionPlace(String placeTitle, String thumbURL, double lat, double lon) {
         this.placeTitle = placeTitle;
         this.thumbURL = thumbURL;
@@ -25,6 +33,13 @@ public class ExcursionPlace implements Parcelable, Comparable {
     }
 
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public String getPlaceTitle() {
         return placeTitle != null ? placeTitle : null;

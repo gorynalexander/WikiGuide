@@ -64,7 +64,6 @@ public class LocationManager implements LocationListener {
         locationRequest.setInterval(5000);
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
     }
 
     public void updateMap(GoogleMap map) {

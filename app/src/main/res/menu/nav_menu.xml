@@ -3,12 +3,21 @@
     <item
         android:id="@+id/action_nav_main"
         android:icon="@drawable/ic_home_black_18dp"
-        android:title="Список мест" />
+        android:title="Nearby places" />
     <item
         android:id="@+id/action_nav_map"
         android:icon="@drawable/ic_map_black_18dp"
-        android:title="Карта"/>    <item
+        android:title="Map"/>    <item
         android:id="@+id/action_excursions_list"
         android:icon="@drawable/ic_explore_black_18dp"
         android:title="Excursions"/>
+
+    <item
+
+        android:icon="@drawable/ic_info_outline_black_24dp"
+        android:title="About us" />
+
+    <item
+        android:icon="@drawable/ic_share_black_24dp"
+        android:title="Share" />
 </menu>

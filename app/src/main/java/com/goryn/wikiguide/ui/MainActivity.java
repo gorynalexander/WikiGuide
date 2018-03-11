@@ -143,9 +143,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         buildGoogleAPiClient();
 
 
-        //broadcastReceiver = new NetworkBroadcastReceiver();
-        //broadcastReceiver.setActivityHandler(this);
-        //registerReceiver(broadcastReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
         // TODO : UNREGISTER BROADCAST RECEIVING
 
         if (savedInstanceState == null) {
@@ -295,11 +292,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             @Override
             public void onResponse(Call<QueryResult> call, retrofit2.Response<QueryResult> response) {
                 App.setQuery(response.body().getQuery());
-
                 placesFragment.notifyDataFromActivity();
-
-                // TODO: UPDATE MAP IF IT'S ALIVE
-
             }
 
             @Override
